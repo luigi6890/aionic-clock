@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aionic Clock - The Ultimate Time Kit</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body data-view="clock" data-clock="digital" data-dial="arabic" data-sweep="smooth" data-theme="dark" data-variant="glass" data-wall="off">
+  <div class="background-blobs">
+    <div class="stars" id="stars" aria-hidden="true"></div>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="rays" id="rays" aria-hidden="true"></div>
+    <div class="bubbles" id="bubbles" aria-hidden="true"></div>
+    <div class="mist" id="mist" aria-hidden="true"></div>
+  </div>
+
+  <!-- Feature navigation (scrolls horizontally when crowded) -->
+  <nav class="feature-nav" id="featureNav" aria-label="Features">
+    <button class="nav-arrow hidden" id="navPrev" aria-label="Scroll tabs left">‹</button>
+    <div class="nav-scroll" id="navScroll">
+      <button class="nav-btn active" data-goto="clock">🕒 Clock <kbd>C</kbd></button>
+      <button class="nav-btn" data-goto="timer">⏳ Timer <kbd>T</kbd></button>
+      <button class="nav-btn" data-goto="stopwatch">⏱️ Stopwatch <kbd>S</kbd></button>
+      <button class="nav-btn" data-goto="alarm">⏰ Alarm <kbd>A</kbd></button>
+      <button class="nav-btn" data-goto="pomodoro">🍅 Pomodoro <kbd>P</kbd></button>
+    </div>
+    <button class="nav-arrow hidden" id="navNext" aria-label="Scroll tabs right">›</button>
+  </nav>
+
+  <!-- Left dock: toolbar + oblong world-clock toggle + world-clock panel -->
+  <div class="left-dock">
+  <!-- Top-left toolbar (kept clear of top-right compact widget) -->
+  <div class="toolbar">
+    <button class="tool-btn" id="clockModeBtn" aria-label="Toggle analog / digital mode (M)" title="Analog / Digital (M)">🔢</button>
+    <button class="tool-btn" id="themeBtn" aria-label="Toggle light / dark mode (L)" title="Light / Dark (L)">🌙</button>
+    <button class="tool-btn" id="variantBtn" aria-label="Toggle glass / solid card theme" title="Glass / Solid card theme">🪟</button>
+    <button class="tool-btn" id="skyBtn" aria-label="Toggle time-of-day sky background" title="Time-of-day sky background">☁️</button>
+    <button class="tool-btn" id="wallBtn" aria-label="Wall clock fullscreen mode (X)" title="Wall clock / screensaver (X)">⛶</button>
+  </div>
+  <button class="zone-toggle" id="zoneBtn" aria-label="Toggle world clock panel (W)" title="World clock (W)" aria-pressed="false">🌐 <span>World Clock</span></button>
+
+  <!-- World clock panel: fixed left side, scrollable -->
+  <aside class="zone-strip" id="zoneStrip" aria-label="World clock">
+    <div class="zone-bar">
+      <span class="zone-title">🌐 World clock</span>
+      <label class="zone-sort">Sort
+        <select id="zoneSort">
+          <option value="manual">Manual</option>
+          <option value="city">City</option>
+          <option value="country">Country</option>
+          <option value="time">Time</option>
+        </select>
+      </label>
+      <div class="zone-toggles">
+        <button class="chip mini active" id="zoneOffsetBtn" title="Show GMT offsets">GMT</button>
+        <button class="chip mini" id="zoneFormatBtn" title="12H / 24H format">24H</button>
+        <button class="chip mini active" id="zoneSecsBtn" title="Show seconds">Secs</button>
+      </div>
+    </div>
+    <div class="zone-row" id="zoneRow"></div>
+    <p class="zone-hint">Manual sort enables drag reorder · Click a zone for primary preview · <kbd>W</kbd></p>
+  </aside>
+  </div>
+
+  <div class="app">
+    <!-- Main clock (shrinks to top-right widget when a tool is active) -->
+    <main class="clock-card" id="clockCard" aria-label="Current time">
+      <h1 class="title" id="clockTitle">Digital Clock</h1>
+      <p class="date" id="date">Loading date...</p>
+      <button class="primary-badge hidden" id="primaryBadge" title="Back to local time">📍 <span id="primaryName"></span> ✕</button>
+
+      <!-- Analog face (replaces digital when active, takes full space) -->
+      <div class="analog-wrap" id="analogWrap">
+        <div class="analog-face" id="analogFace">
+          <div class="tick-ring" id="tickRing"></div>
+          <div class="numerals" id="numerals" title="Click numerals to cycle Standard / Roman / Markers (D)"></div>
+          <div class="hand hour-hand" id="hourHand"></div>
+          <div class="hand minute-hand" id="minuteHand"></div>
+          <div class="hand second-hand" id="secondHand"></div>
+          <button class="center-dot" id="centerDot" aria-label="Toggle smooth sweep / tick (click)" title="Smooth sweep / tick (click)"></button>
+          <div class="analog-date" id="analogDate">--</div>
+          <div class="digital-overlay" id="digitalOverlay">--:--:--</div>
+        </div>
+        <div class="analog-options">
+          <div class="dial-switch" role="group" aria-label="Dial style">
+            <button class="chip dial-btn active" data-dial="arabic">Standard</button>
+            <button class="chip dial-btn" data-dial="roman">Roman</button>
+            <button class="chip dial-btn" data-dial="markers">Markers</button>
+          </div>
+          <button class="chip sweep-btn" id="sweepBtn">Sweep: Smooth</button>
+        </div>
+      </div>
+
+      <div class="time" id="clock" aria-live="polite">
+        <div class="time-unit">
+          <span id="hours">00</span>
+          <label>Hours</label>
+        </div>
+        <span class="colon">:</span>
+        <div class="time-unit">
+          <span id="minutes">00</span>
+          <label>Minutes</label>
+        </div>
+        <span class="colon">:</span>
+        <div class="time-unit">
+          <span id="seconds">00</span>
+          <label>Seconds</label>
+        </div>
+        <span id="ampm" class="ampm hidden">AM</span>
+      </div>
+
+      <!-- Mini analog face for the compact widget (timer/stopwatch/alarm views) -->
+      <div id="widgetAnalog">
+        <div class="widget-face" id="widgetFace">
+          <div class="tick-ring" id="widgetTicks"></div>
+          <div class="numerals" id="widgetNumerals" aria-hidden="true"></div>
+          <div class="w-hand w-hour" id="wHour"></div>
+          <div class="w-hand w-minute" id="wMinute"></div>
+          <div class="w-hand w-second" id="wSecond"></div>
+          <div class="w-dot"></div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <span class="format-label active" id="label24">24H</span>
+        <button
+          class="toggle"
+          id="formatToggle"
+          role="switch"
+          aria-checked="false"
+          aria-label="Toggle 12-hour / 24-hour format (F)"
+        >
+          <span class="toggle-knob"></span>
+        </button>
+        <span class="format-label" id="label12">12H</span>
+      </div>
+      <p class="hint">Press <kbd>T</kbd> <kbd>S</kbd> <kbd>A</kbd> for tools · <kbd>M</kbd> analog · <kbd>L</kbd> theme · <kbd>X</kbd> wall · <kbd>?</kbd> help</p>
+    </main>
+
+    <!-- Feature stage (center stage when active) -->
+    <section class="stage" aria-live="polite">
+      <!-- TIMER -->
+      <div class="feature-panel" id="panel-timer" role="tabpanel" aria-label="Timer">
+        <h2>⏳ Timer</h2>
+        <div class="big-display" id="timerDisplay">00:00:00</div>
+        <div class="progress"><div class="progress-fill" id="timerProgress"></div></div>
+        <div class="timer-inputs">
+          <label>H <input type="number" id="timerH" min="0" max="99" value="0" /></label>
+          <label>M <input type="number" id="timerM" min="0" max="59" value="0" /></label>
+          <label>S <input type="number" id="timerS" min="0" max="59" value="0" /></label>
+        </div>
+        <div class="presets">
+          <button class="chip" data-preset="10">10s</button>
+          <button class="chip" data-preset="30">30s</button>
+          <button class="chip" data-preset="60">1m</button>
+          <button class="chip" data-preset="300">5m</button>
+          <button class="chip" data-preset="600">10m</button>
+        </div>
+        <div class="btn-row">
+          <button class="btn primary" id="timerStart">Start <kbd>Space</kbd></button>
+          <button class="btn ghost" id="timerReset">Reset <kbd>R</kbd></button>
+        </div>
+        <p class="status" id="timerStatus">Set a duration and press Start.</p>
+      </div>
+
+      <!-- STOPWATCH -->
+      <div class="feature-panel" id="panel-stopwatch" role="tabpanel" aria-label="Stopwatch">
+        <h2>⏱️ Stopwatch</h2>
+        <div class="big-display mono" id="swDisplay">00:00.<span class="cs">00</span></div>
+        <div class="btn-row">
+          <button class="btn primary" id="swStart">Start <kbd>Space</kbd></button>
+          <button class="btn ghost" id="swLap">Lap</button>
+          <button class="btn danger" id="swReset">Reset <kbd>R</kbd></button>
+        </div>
+        <ol class="laps" id="swLaps"></ol>
+      </div>
+
+      <!-- ALARM -->
+      <div class="feature-panel" id="panel-alarm" role="tabpanel" aria-label="Alarm">
+        <h2>⏰ Alarm</h2>
+        <div class="alarm-form">
+          <input type="time" id="alarmInput" required />
+          <button class="btn primary" id="alarmAdd">Add alarm</button>
+        </div>
+        <ul class="alarm-list" id="alarmList"></ul>
+        <p class="status" id="alarmStatus">No alarms set.</p>
+        <div class="ringing hidden" id="ringing">
+          <p>🔔 Alarm ringing — <span id="ringingTime"></span></p>
+          <div class="btn-row">
+            <button class="btn primary" id="dismissAlarm">Dismiss</button>
+            <button class="btn ghost" id="snoozeAlarm">Snooze 5m</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- POMODORO -->
+      <div class="feature-panel" id="panel-pomodoro" role="tabpanel" aria-label="Pomodoro" data-phase="work">
+        <h2>🍅 Pomodoro</h2>
+        <p class="pomo-active-task" id="pomoActiveTask"></p>
+        <div class="pomo-mode-row">
+          <span class="pomo-phase" id="pomoModeLabel">Focus</span>
+          <span class="pomo-cycle" id="pomoCycle">Session 1/4</span>
+        </div>
+        <div class="pomo-phases" role="group" aria-label="Switch phase">
+          <button class="chip phase-btn active" data-phase="work">Focus</button>
+          <button class="chip phase-btn" data-phase="short">Short</button>
+          <button class="chip phase-btn" data-phase="long">Long</button>
+        </div>
+        <div class="pomo-face-wrap">
+          <svg class="pomo-ring" viewBox="0 0 200 200" aria-hidden="true">
+            <circle class="ring-bg" cx="100" cy="100" r="94"></circle>
+            <circle class="ring-fg" id="pomoRing" cx="100" cy="100" r="94" transform="rotate(-90 100 100)"></circle>
+          </svg>
+          <div class="analog-face pomo-face" id="pomoFace" title="Click to toggle Do Not Disturb">
+            <div class="tick-ring" id="pomoTicks"></div>
+            <button class="pomo-dnd-toggle" id="pomoDndToggle" aria-pressed="false" title="Do Not Disturb">DND</button>
+            <div class="pomo-countdown" id="pomoCountdown">25:00</div>
+          </div>
+        </div>
+        <div class="pomo-dots" id="pomoDots" aria-label="Sessions completed this cycle"></div>
+        <div class="btn-row">
+          <button class="btn primary" id="pomoStart">Start <kbd>Space</kbd></button>
+          <button class="btn ghost" id="pomoSkip" title="Skip to next phase">⏭</button>
+          <button class="btn ghost" id="pomoReset">Reset <kbd>R</kbd></button>
+        </div>
+        <p class="status" id="pomoStatus">Press Start to begin a focus session.</p>
+        <div class="pomo-config">
+          <label>Work <input type="number" id="cfgWork" min="1" max="180" value="25" />m</label>
+          <label>Short <input type="number" id="cfgShort" min="1" max="60" value="5" />m</label>
+          <label>Long <input type="number" id="cfgLong" min="1" max="90" value="15" />m</label>
+          <label>Every <input type="number" id="cfgCycle" min="1" max="12" value="4" title="Work sessions per cycle — a long break follows the last one" />🍅</label>
+          <label class="check"><input type="checkbox" id="cfgAutoBreaks" /> Auto-breaks</label>
+          <label class="check"><input type="checkbox" id="cfgAutoWork" /> Auto-work</label>
+        </div>
+        <div class="pomo-tasks">
+          <h3>Tasks</h3>
+          <div class="task-add">
+            <input type="text" id="taskText" placeholder="New task..." maxlength="80" />
+            <select id="taskPri" aria-label="Priority">
+              <option value="medium" selected>Med</option>
+              <option value="high">High</option>
+              <option value="low">Low</option>
+            </select>
+            <input type="number" id="taskEst" min="1" max="99" value="1" title="Pomodoro blocks" />
+            <button class="btn primary" id="taskAdd">Add</button>
+          </div>
+          <div class="task-filters" role="group" aria-label="Filter tasks">
+            <button class="chip active" data-filter="all">All</button>
+            <button class="chip" data-filter="active">Active</button>
+            <button class="chip" data-filter="done">Done</button>
+            <select id="taskPriFilter" aria-label="Filter by priority">
+              <option value="all">All priorities</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+            <button class="chip active" id="taskBottomBtn" title="Move finished tasks to the bottom">Bottom ✓</button>
+          </div>
+          <ul class="task-list" id="taskList"></ul>
+          <div class="btn-row">
+            <button class="btn ghost" id="taskClearDone">Clear done</button>
+            <button class="btn danger" id="taskClearAll">Clear all</button>
+          </div>
+          <p class="status" id="taskStatus"></p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Floating alarm widget: quick access when an alarm fires while Clock/Timer/Stopwatch is focused -->
+  <div class="alarm-widget hidden" id="alarmWidget" role="alert">
+    <p>🔔 <span id="alarmWidgetTime"></span></p>
+    <div class="btn-row">
+      <button class="btn primary" id="widgetDismiss">Dismiss</button>
+      <button class="btn ghost" id="widgetSnooze">+5m</button>
+    </div>
+  </div>
+
+  <!-- Ambient soundscapes: right-docked panel + buttons -->
+  <div class="amb-panel" id="ambPanel" aria-label="Ambient soundscapes">
+    <div class="amb-head">
+      <span>🎧 Ambience</span>
+      <button id="ambShuffle" title="Auto-mix: rotate sounds">🔀</button>
+      <button id="ambAll" title="Play all soundscapes">All</button>
+      <button id="ambClose" aria-label="Close panel">✕</button>
+    </div>
+    <canvas id="ambViz" width="268" height="54"></canvas>
+    <div class="amb-vol"><span>🔊</span><input type="range" id="ambVol" min="0" max="100" value="70" aria-label="Volume" /><span class="amb-vol-val" id="ambVolVal">70</span></div>
+    <ul class="amb-list" id="ambList"></ul>
+    <p class="amb-note">Procedural audio · no files</p>
+  </div>
+  <div class="amb-btns">
+    <button class="amb-btn" id="ambBtn" aria-label="Ambient soundscapes"><span id="ambIco">🎵</span><span id="ambLabel">Ambience</span></button>
+  </div>
+
+  <!-- Help floating button + modal -->
+  <button class="help-btn" id="helpBtn" aria-label="Show keyboard shortcuts (?)">?</button>
+
+  <!-- About button + modal -->
+  <button class="info-btn" id="infoBtn" aria-label="About Aionic Clock">ⓘ</button>
+
+  <div class="modal-overlay" id="aboutModal" aria-hidden="true">
+    <div class="modal about-modal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
+      <button class="modal-x" id="aboutX" aria-label="Close about">✕</button>
+      <div class="about-banner">
+        <div class="about-logo">
+          <svg viewBox="0 0 96 96" class="logo-svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="aioDisc" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#22d3ee" />
+                <stop offset="0.55" stop-color="#6366f1" />
+                <stop offset="1" stop-color="#a78bfa" />
+              </linearGradient>
+            </defs>
+            <circle cx="48" cy="48" r="44" fill="url(#aioDisc)" />
+            <circle cx="48" cy="48" r="44" fill="#000" opacity="0.08" />
+            <circle cx="48" cy="48" r="33" fill="none" stroke="url(#aioA)" stroke-width="10" stroke-dasharray="12 39.84" stroke-dashoffset="6" />
+            <circle cx="48" cy="48" r="33" fill="none" stroke="#ffe6a3" stroke-width="10" stroke-dasharray="12 195.35" stroke-dashoffset="-45.84" />
+            <g fill="#fff" opacity="0.9">
+              <circle cx="66" cy="16.8" r="2.4" />
+              <circle cx="79.2" cy="30" r="2.4" />
+              <circle cx="79.2" cy="66" r="2.4" />
+              <circle cx="66" cy="79.2" r="2.4" />
+              <circle cx="30" cy="79.2" r="2.4" />
+              <circle cx="16.8" cy="66" r="2.4" />
+              <circle cx="16.8" cy="30" r="2.4" />
+              <circle cx="30" cy="16.8" r="2.4" />
+            </g>
+            <defs>
+              <linearGradient id="aioA" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#fffbd1" />
+                <stop offset="0.55" stop-color="#fcd34d" />
+                <stop offset="1" stop-color="#fb7185" />
+              </linearGradient>
+            </defs>
+            <text x="48" y="63" text-anchor="middle" font-size="46" font-weight="800" font-family="inherit" fill="url(#aioA)">A</text>
+          </svg>
+        </div>
+        <div class="banner-text">
+          <h2 id="aboutTitle">Aionic Clock</h2>
+          <p class="tagline">&ldquo;<span id="taglineText"></span><span class="caret"></span>&rdquo;</p>
+          <span class="ver">v1.0.0</span>
+        </div>
+      </div>
+      <div class="about-body">
+        <section>
+          <h3>Overview</h3>
+          <p>Aionic Clock is an all-in-one time companion: a precision digital and analog clock fused with a timer,
+            stopwatch, alarms, Pomodoro focus sessions with tasks, a world clock, living sky themes, a fullscreen
+            wall mode, and procedural ambient soundscapes.</p>
+          <p>It solves tab-switching fatigue — instead of juggling a clock app, a timer app, a focus app, and a
+            soundscape app, one calm page covers timing, focus, and atmosphere. Use it as a desk clock, a study
+            companion, a meeting timer, or a screensaver.</p>
+          <p class="muted">Built for students, makers, remote workers, and anyone who likes their time beautifully kept.</p>
+        </section>
+        <section>
+          <h3>Name &amp; inspiration</h3>
+          <p><b>Aionic</b> fuses two ideas of time. <b>Aion</b>, the Hellenistic deity of unbounded, eternal time —
+            often depicted ringed by the coils of a serpent — stands for the infinite: cycles, skies, and ambient
+            moods that never repeat the same way twice.</p>
+          <p>The <b>atomic clock</b> stands for the opposite pole: absolute precision — boundary-locked seconds,
+            phase-locked blinks, and timers you can trust. The logo brings them together: a bright gradient
+            <b>A</b> ringed by twelve hour markers — four glowing cardinals for 12, 3, 6 and 9 — precision
+            wearing an emblem.</p>
+        </section>
+        <section>
+          <h3>Key features</h3>
+          <div class="feat-grid">
+            <div><b>🕒 Dual clock</b><p>Two faces for the same moment.</p><ul><li>Analog + digital faces</li><li>12/24H with second-synced colons</li><li>Standard, Roman &amp; marker dials</li><li>Sweep or ticking second hand</li></ul></div>
+            <div><b>⏳ Timer &amp; ⏱️ Stopwatch</b><p>Measure anything precisely.</p><ul><li>Stacking presets from 10s to 10m</li><li>Lap table with live progress bar</li><li>Centisecond stopwatch readout</li></ul></div>
+            <div><b>⏰ Alarms</b><p>Never miss the moment.</p><ul><li>Repeating chime with snooze</li><li>Floating quick-access widget</li><li>Flashing tab title</li><li>Saved locally, box resets to 12 AM</li></ul></div>
+            <div><b>🍅 Pomodoro</b><p>Focus in flavorful cycles.</p><ul><li>Focus, short &amp; long phases, depleting ring</li><li>DND by pressing the dial, ⏭ skip rotation</li><li>Tasks with priorities &amp; 🍅 block estimates</li><li>Auto-start options, session dots</li></ul></div>
+            <div><b>🌐 World clock</b><p>Ten zones at a glance.</p><ul><li>Day-phase emoji per local hour</li><li>Drag order; sort by city, country, time</li><li>Click-to-preview on the main dial</li><li>Country, date &amp; GMT offsets</li></ul></div>
+            <div><b>🌌 Living sky</b><p>Weather for your wallpaper.</p><ul><li>24-hour gradient cycle with stars &amp; rays</li><li>Per-phase focus palettes + bubbles</li><li>Glass or solid soft-color cards</li></ul></div>
+            <div><b>⛶ Wall mode</b><p>Turn any screen into a clock.</p><ul><li>Fullscreen with auto-hiding chrome</li><li>Contracting analog face, solid-ink digits</li><li>In-face date pill on analog</li></ul></div>
+            <div><b>🎧 Ambience</b><p>Eight rooms of procedural sound.</p><ul><li>Storm, dawn, leaves, brook, frogs, bamboo, night, fire</li><li>Layer mixer, auto-DJ rotation, Play All</li><li>Live color-coded visualizer</li></ul></div>
+            <div><b>⌨️ Keyboard-first</b><p>Mouse optional.</p><ul><li>Full shortcut map under <kbd>?</kbd></li><li>Display keys stay silent in wall mode</li></ul></div>
+            <div><b>🔍 Compact widget</b><p>Time stays visible everywhere.</p><ul><li>Mini clock parks top-right in every tool</li><li>Follows analog and digital modes</li><li>AM/PM badge fits without resizing</li></ul></div>
+          </div>
+        </section>
+        <section>
+          <h3>How to use</h3>
+          <ol class="howto">
+            <li>Pick a view: <kbd>C</kbd> clock, <kbd>T</kbd> timer, <kbd>S</kbd> stopwatch, <kbd>A</kbd> alarm, <kbd>W</kbd> world clock, <kbd>P</kbd> Pomodoro.</li>
+            <li>Press <kbd>M</kbd> for analog, <kbd>F</kbd> for 12/24H, <kbd>X</kbd> for the fullscreen wall clock.</li>
+            <li>Click a world-clock zone to preview it on the main dial; click again to return to local.</li>
+            <li>Press the Pomodoro dial for Do Not Disturb; ⏭ skips to the next phase.</li>
+            <li>Hit the 🎵 button for ambient soundscapes — mix layers, shuffle, or play all.</li>
+            <li>Restyle with <kbd>L</kbd>/<kbd>1</kbd> (light/dark), the 🪟/🧱 toggle or <kbd>2</kbd> (glass/solid), and ☁️ or <kbd>3</kbd> for living backgrounds.</li>
+            <li>Press <kbd>?</kbd> anytime for the shortcut map, or ⓘ to revisit this guide.</li>
+          </ol>
+        </section>
+        <section>
+          <h3>Easter eggs &amp; fun facts</h3>
+          <div class="feat-grid">
+            <div><b>🍩 Dial press</b><span>Pressing the Pomodoro face toggles Do Not Disturb — no button needed.</span></div>
+            <div><b>👆 Secret clock controls</b><span>Click analog numerals to cycle dials; the center dot flips sweep/tick.</span></div>
+            <div><b>👻 Hover ghosts</b><span>Hovering the main analog face reveals its digital readout; hovering volume reveals its level.</span></div>
+            <div><b>🥞 Stacking presets</b><span>Tapping a timer preset repeatedly piles time on instead of replacing it.</span></div>
+            <div><b>⏭ Skip stepping</b><span>Skip on a running Pomodoro jumps to whatever phase the cycle order dictates next.</span></div>
+            <div><b>🔀 Restless DJ</b><span>Ambience shuffle never sits still — it rotates a fresh track in every minute or so.</span></div>
+            <div><b>⚡ Colon lockstep</b><span>The blinking colons are phase-locked to whole seconds, not just animated.</span></div>
+            <div><b>🌍 One-click time travel</b><span>Clicking a world zone re-times the whole main clock to that city.</span></div>
+            <div><b>🚨 Midnight reset</b><span>The alarm box snaps back to 12:00 AM after each entry; greyed alarms sleep silently.</span></div>
+            <div><b>🌀 Spinning mark</b><span>Hover the About logo and the whole emblem rotates in an endless loop.</span></div>
+          </div>
+        </section>
+        <section>
+          <h3>Tech stack</h3>
+          <div class="stack-row">
+            <span>HTML</span><span>CSS</span><span>JavaScript</span><span>Web Audio API</span><span>SVG</span><span>Intl API</span><span>localStorage</span>
+          </div>
+          <p class="muted">No frameworks, no audio files, no network calls — every sound and gradient is generated in code.</p>
+        </section>
+        <section>
+          <h3>Design philosophy</h3>
+          <ul class="philo">
+            <li><b>Calm technology</b> — chrome fades away; time stays.</li>
+            <li><b>Procedural everything</b> — sounds, skies, and motion synthesized live.</li>
+            <li><b>Keyboard-first</b> — every major action has a key.</li>
+            <li><b>Soft by default</b> — no pure black/white, rounded everywhere, gentle motion.</li>
+          </ul>
+        </section>
+        <section>
+          <h3>FAQ</h3>
+          <details>
+            <summary>Does it work offline?</summary>
+            <p>Yes. It's a single page of HTML, CSS, and JavaScript with no network requests — save it and open it anywhere.</p>
+          </details>
+          <details>
+            <summary>Are my alarms and tasks saved?</summary>
+            <p>Yes, in this browser via localStorage — alarms, tasks, Pomodoro settings, themes, and volume all persist across visits.</p>
+          </details>
+          <details>
+            <summary>Why didn't my alarm make sound?</summary>
+            <p>Browsers block audio until you interact with the page — click or press any key once. Also check the alarm is toggled ON (greyed out means off).</p>
+          </details>
+          <details>
+            <summary>Does it track my location?</summary>
+            <p>No. World times come from built-in IANA time zones; no geolocation is ever requested.</p>
+          </details>
+          <details>
+            <summary>How accurate is the clock?</summary>
+            <p>It follows your system clock, with digits locked to whole-second boundaries so the blinking colons stay in step.</p>
+          </details>
+          <details>
+            <summary>Can I use it as a screensaver?</summary>
+            <p>Press <kbd>X</kbd> for wall mode — it goes fullscreen and hides every control until you move the mouse.</p>
+          </details>
+        </section>
+        <p class="credit">A fun personal project by <b>luigi6890</b> · v1.0.0</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="helpModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+      <h2 id="helpTitle">Controls &amp; shortcuts</h2>
+      <div class="shortcuts">
+        <div class="shortcut-col">
+          <h3>Views</h3>
+          <table>
+            <tr><td><kbd>T</kbd></td><td>Open Timer</td></tr>
+            <tr><td><kbd>S</kbd></td><td>Open Stopwatch</td></tr>
+            <tr><td><kbd>A</kbd></td><td>Open Alarm</td></tr>
+            <tr><td><kbd>W</kbd></td><td>World clock panel</td></tr>
+            <tr><td><kbd>P</kbd></td><td>Open Pomodoro</td></tr>
+            <tr><td><kbd>C</kbd> / <kbd>Esc</kbd></td><td>Back to Clock / collapse feature</td></tr>
+          </table>
+          <h3>Clock display</h3>
+          <table>
+            <tr><td><kbd>M</kbd></td><td>Toggle Analog / Digital mode</td></tr>
+            <tr><td><kbd>F</kbd></td><td>Toggle 12H / 24H format</td></tr>
+            <tr><td><kbd>D</kbd></td><td>Cycle dial: Standard / Roman / Markers</td></tr>
+            <tr><td><kbd>/</kbd></td><td>Toggle second-hand sweep / tick</td></tr>
+          </table>
+        </div>
+        <div class="shortcut-col">
+          <h3>Timer tools</h3>
+          <table>
+            <tr><td><kbd>Space</kbd></td><td>Start / Pause timer, stopwatch or pomodoro</td></tr>
+            <tr><td><kbd>R</kbd></td><td>Reset timer, stopwatch or pomodoro</td></tr>
+          </table>
+          <h3>Pomodoro</h3>
+          <table>
+            <tr><td>Press dial</td><td>Toggle Do Not Disturb</td></tr>
+            <tr><td>⏭ button</td><td>Skip to next phase</td></tr>
+          </table>
+          <h3>Wall mode</h3>
+          <table>
+            <tr><td><kbd>X</kbd></td><td>Wall clock fullscreen (screensaver)</td></tr>
+            <tr><td>Move mouse</td><td>Reveal controls in wall mode</td></tr>
+            <tr><td><kbd>Esc</kbd></td><td>Exit wall mode</td></tr>
+          </table>
+          <h3>Look &amp; help</h3>
+          <table>
+            <tr><td><kbd>1</kbd></td><td>Toggle Light / Dark mode</td></tr>
+            <tr><td><kbd>2</kbd></td><td>Toggle Glass / Solid card theme</td></tr>
+            <tr><td><kbd>3</kbd></td><td>Toggle dynamic sky background</td></tr>
+            <tr><td><kbd>`</kbd></td><td>Show / hide About</td></tr>
+            <tr><td><kbd>~</kbd></td><td>Show / hide Ambience</td></tr>
+            <tr><td><kbd>?</kbd> / <kbd>H</kbd></td><td>Show / hide Help</td></tr>
+          </table>
+        </div>
+      </div>
+      <button class="btn primary" id="helpClose">Close (Esc)</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
