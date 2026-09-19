@@ -15,7 +15,7 @@ const DEFAULT_ZONE_ORDER = ZONES.map(z => z.id);
 
 // ---------- Prefs ----------
 const PREF_KEY = 'modern-clock-prefs';
-let prefs = { theme: 'dark', variant: 'glass', sky: true, clockMode: 'digital', dial: 'arabic', sweep: 'smooth', is12Hour: false, ambVol: 70,
+let prefs = { theme: 'dark', variant: 'glass', sky: true, clockMode: 'digital', dial: 'arabic', sweep: 'smooth', is12Hour: false, ambVol: 70, alarmSort: 'manual', showAlarmCountdown: false,
   zones: { order: [...DEFAULT_ZONE_ORDER], sort: 'time', showOffset: true, h12: null, showSeconds: true, open: false },
   pomo: { workMin: 25, shortMin: 5, longMin: 15, cycle: 4, autoBreaks: false, autoWork: false } };
 try {
@@ -81,6 +81,7 @@ function updateClock() {
   if (primaryZone) faceOpts.timeZone = primaryZone;
   analogDateEl.textContent = now.toLocaleDateString(undefined, faceOpts);
   renderZoneTimes(now);
+  tickAlarmCountdowns(now);
   checkAlarms(now);
 }
 function setFormat(to12) {
@@ -222,8 +223,9 @@ function setSweep(s) {
 centerDot.addEventListener('click', (e) => { e.stopPropagation(); setSweep(prefs.sweep === 'smooth' ? 'tick' : 'smooth'); });
 sweepBtn.addEventListener('click', () => setSweep(prefs.sweep === 'smooth' ? 'tick' : 'smooth'));
 
-// Smooth analog loop (rAF) — second hand sweeps when smooth, ticks when tick mode
+// Smooth analog loop (rAF) — rAF is scheduled first so one bad frame can never stop time
 function analogLoop() {
+  requestAnimationFrame(analogLoop);
   const now = new Date();
   const ms = now.getMilliseconds();
   let s, m, h;
@@ -246,7 +248,6 @@ function analogLoop() {
   wMinute.style.transform = `rotate(${min * 6}deg)`;
   wHour.style.transform = `rotate(${hr * 30}deg)`;
   digitalOverlay.textContent = digitalString(now);
-  requestAnimationFrame(analogLoop);
 }
 
 // ---------- Theme (light / dark + glass / solid toggle) ----------
@@ -256,6 +257,8 @@ const skyBtn = document.getElementById('skyBtn');
 function applyThemeIcon() {
   // Sun while light, moon while dark; window icon while glass, brick while solid.
   themeBtn.textContent = document.body.dataset.theme === 'light' ? '☀️' : '🌙';
+  themeBtn.disabled = prefs.sky === true;
+  themeBtn.title = prefs.sky === true ? 'Turn off Sky to switch theme' : 'Light / Dark (L)';
   skyBtn.classList.toggle('on', prefs.sky === true);
   variantBtn.textContent = document.body.dataset.variant === 'solid' ? '🧱' : '🪟';
   syncDockWidth();
@@ -270,6 +273,7 @@ variantBtn.addEventListener('click', () => {
   variantBtn.blur();
 });
 function setTheme(t) {
+  if (prefs.sky === true) return; // theme is locked while the sky drives contrast
   prefs.theme = t; savePrefs();
   document.body.dataset.theme = t;
   applyThemeIcon();
@@ -351,10 +355,18 @@ function applySky(now = new Date()) {
   s.setProperty('--stars-opacity', (Math.pow(night, 1.4) * 0.9).toFixed(3));
   s.setProperty('--rays-opacity', (Math.pow(1 - night, 2) * 0.55).toFixed(3));
 }
+let skyPrevTheme = null;
 function setSky(on) {
   prefs.sky = on; savePrefs();
   document.body.dataset.sky = on ? 'on' : 'off';
-  if (on) applySky();
+  if (on) {
+    skyPrevTheme = prefs.theme;
+    if (prefs.theme !== 'dark') { prefs.theme = 'dark'; document.body.dataset.theme = 'dark'; }
+    applySky();
+  } else if (skyPrevTheme) {
+    prefs.theme = skyPrevTheme; document.body.dataset.theme = skyPrevTheme;
+    skyPrevTheme = null; savePrefs();
+  }
   applyThemeIcon();
 }
 skyBtn.addEventListener('click', () => { setSky(prefs.sky !== true); skyBtn.blur(); });
@@ -478,19 +490,29 @@ function unlockAudio() {
 // so timer/alarm sounds actually play.
 ['pointerdown', 'keydown', 'touchstart'].forEach(ev =>
   document.addEventListener(ev, unlockAudio, { passive: true }));
-function beep(times = 3) {
+const TONES = {
+  chime:   { freq: 880, type: 'sine', times: 3, gap: 0.55, dur: 0.4, vol: 0.5 },
+  bell:    { freq: 659.25, type: 'triangle', times: 3, gap: 0.75, dur: 0.65, vol: 0.45 },
+  digital: { freq: 1200, type: 'square', times: 4, gap: 0.28, dur: 0.16, vol: 0.2 },
+  gentle:  { freq: 523.25, type: 'sine', times: 2, gap: 0.9, dur: 0.85, vol: 0.4 },
+  urgent:  { freqs: [880, 1174.66], type: 'square', times: 6, gap: 0.32, dur: 0.2, vol: 0.25 },
+};
+const SOUND_NAMES = { chime: 'Chime', bell: 'Bell', digital: 'Digital', gentle: 'Gentle', urgent: 'Urgent' };
+function beep(times = 3, sound = 'chime') {
   try {
     audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === 'suspended') audioCtx.resume();
+    const T = TONES[sound] || TONES.chime;
     let t = audioCtx.currentTime;
     for (let i = 0; i < times; i++) {
       const o = audioCtx.createOscillator(), g = audioCtx.createGain();
       o.connect(g); g.connect(audioCtx.destination);
-      o.frequency.value = 880; o.type = 'sine';
+      o.frequency.value = T.freqs ? T.freqs[i % T.freqs.length] : T.freq;
+      o.type = T.type;
       g.gain.setValueAtTime(0.001, t);
-      g.gain.exponentialRampToValueAtTime(0.5, t + 0.05);
-      g.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
-      o.start(t); o.stop(t + 0.45); t += 0.55;
+      g.gain.exponentialRampToValueAtTime(T.vol, t + 0.05);
+      g.gain.exponentialRampToValueAtTime(0.001, t + T.dur);
+      o.start(t); o.stop(t + T.dur + 0.05); t += T.gap;
     }
   } catch (e) { /* audio blocked */ }
 }
@@ -600,12 +622,28 @@ const alarmInput = document.getElementById('alarmInput');
 const alarmList = document.getElementById('alarmList');
 const alarmStatus = document.getElementById('alarmStatus');
 const ringing = document.getElementById('ringing');
-const ringingTime = document.getElementById('ringingTime');
 const alarmWidget = document.getElementById('alarmWidget');
-const alarmWidgetTime = document.getElementById('alarmWidgetTime');
 let alarms = [];
-let lastFiredKey = '';
-try { alarms = JSON.parse(localStorage.getItem('digital-clock-alarms') || '[]'); } catch (e) { alarms = []; }
+const ALARM_DEFAULTS = { label: '', repeat: 'once', days: [], snoozeMin: 5, snoozeCount: 0, snoozedUntil: null, snoozeDate: '', firedOnce: false, category: '', sound: 'chime' };
+const SOUND_OPTIONS = [['chime', '🔔 Chime'], ['bell', '🛎️ Bell'], ['digital', '🤖 Digital'], ['gentle', '🎵 Gentle'], ['urgent', '🚨 Urgent']];
+function soundOptions(selected) {
+  return SOUND_OPTIONS.map(([v, n]) => `<option value="${v}"${v === selected ? ' selected' : ''}>${n}</option>`).join('');
+}
+function previewSound(sel) { unlockAudio(); beep(3, sel.value); }
+const CATEGORIES = { personal: '🟢', work: '🔵', focus: '🟣', reminder: '🟡', important: '🔴' };
+const CATEGORY_NAMES = { personal: 'Personal', work: 'Work', focus: 'Focus', reminder: 'Reminder', important: 'Important' };
+try { 
+  alarms = JSON.parse(localStorage.getItem('digital-clock-alarms') || '[]')
+    .map(a => Object.assign({}, ALARM_DEFAULTS, a));
+} catch (e) { alarms = []; }
+const alarmLabelInput = document.getElementById('alarmLabel');
+const alarmRepeat = document.getElementById('alarmRepeat');
+const alarmSnoozeLen = document.getElementById('alarmSnoozeLen');
+const alarmDays = document.getElementById('alarmDays');
+const widgetSnoozeLen = document.getElementById('widgetSnoozeLen');
+const overlapWarn = document.getElementById('overlapWarn');
+const REPEAT_LABEL = { once: 'Once', daily: 'Daily', weekdays: 'Weekdays', weekends: 'Weekends', custom: 'Custom' };
+const DAY_SHORT = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 function saveAlarms() { try { localStorage.setItem('digital-clock-alarms', JSON.stringify(alarms)); } catch (e) {} }
 function fmtAlarm(t) {
   let [h, m] = t.split(':').map(Number);
@@ -613,31 +651,270 @@ function fmtAlarm(t) {
   const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12;
   return `${pad(h)}:${pad(m)} ${ap}`;
 }
+function repeatDetail(a) {
+  if (a.repeat === 'custom') {
+    const ds = (a.days || []).slice().sort((x, y) => x - y).map(d => DAY_SHORT[d]).join(' ');
+    return ds ? ` ${ds}` : 'Custom';
+  }
+  return REPEAT_LABEL[a.repeat] || 'Once';
+}
+function orderedAlarms() {
+  // Time sort means next-to-ring (countdown) order, not wall-clock order.
+  if (prefs.alarmSort === 'time') {
+    const now = new Date();
+    return [...alarms].sort((a, b) => {
+      const na = nextOccurrence(a, now), nb = nextOccurrence(b, now);
+      if (na && nb) return na - nb;
+      if (na) return -1;
+      if (nb) return 1;
+      return a.time.localeCompare(b.time);
+    });
+  }
+  if (prefs.alarmSort === 'label') return [...alarms].sort((a, b) =>
+    (a.label || '~').localeCompare(b.label || '~') || a.time.localeCompare(b.time));
+  return alarms;
+}
 function renderAlarms() {
   alarmList.innerHTML = '';
-  if (!alarms.length) alarmStatus.textContent = 'No alarms set.';
-  else {
-    const on = alarms.filter(a => a.enabled).length;
-    alarmStatus.textContent = `${alarms.length} alarm(s), ${on} active.`;
-  }
-  alarms.forEach(a => {
+  updateAlarmFooter();
+  orderedAlarms().forEach(a => {
     const li = document.createElement('li');
     if (!a.enabled) li.classList.add('disabled');
-    li.innerHTML = `<span class="alarm-time">${fmtAlarm(a.time)}</span>`;
+    const snoozing = a.enabled && a.snoozedUntil;
+    if (snoozing) li.classList.add('snoozed');
+    const main = document.createElement('div'); main.className = 'alarm-main';
+    const tm = document.createElement('span'); tm.className = 'alarm-time';
+    tm.textContent = a.label ? `${fmtAlarm(a.time)} - ${a.label}` : fmtAlarm(a.time);
+    tm.title = tm.textContent;
+    main.appendChild(tm);
+    const sub = document.createElement('span'); sub.className = 'alarm-sub';
+    sub.textContent = (CATEGORIES[a.category] ? CATEGORIES[a.category] + ' ' : '') + repeatDetail(a);
+    if (snoozing) {
+      const tag = document.createElement('span'); tag.className = 'snooze-tag';
+      tag.textContent = ` 🌙 → ${fmtAlarm(a.snoozedUntil)} (${a.snoozeCount}x)`;
+      sub.appendChild(tag);
+    }
+    if (prefs.showAlarmCountdown) {
+      const c = document.createElement('span'); c.className = 'alarm-count'; c.dataset.id = a.id;
+      const t = countdownText(a, new Date());
+      c.textContent = t ? ` · ${t}` : '';
+      sub.appendChild(c);
+    }
+    main.appendChild(sub);
     const acts = document.createElement('div'); acts.className = 'alarm-actions';
+    const tst = document.createElement('button'); tst.className = 'btn ghost'; tst.textContent = 'Test'; tst.title = 'Ring now (schedule untouched)';
+    tst.setAttribute('aria-label', 'Test alarm ' + ringShort(a));
+    tst.addEventListener('click', (e) => { e.stopPropagation(); testAlarm(a.id); });
     const tg = document.createElement('button'); tg.className = 'mini-toggle' + (a.enabled ? '' : ' off'); tg.textContent = a.enabled ? 'ON' : 'OFF';
-    tg.addEventListener('click', () => { a.enabled = !a.enabled; saveAlarms(); renderAlarms(); });
-    const del = document.createElement('button'); del.className = 'mini-del'; del.textContent = '✕'; del.setAttribute('aria-label', 'Delete alarm');
-    del.addEventListener('click', () => { alarms = alarms.filter(x => x.id !== a.id); saveAlarms(); renderAlarms(); });
-    acts.append(tg, del); li.appendChild(acts); alarmList.appendChild(li);
+    tg.addEventListener('click', () => {
+      a.enabled = !a.enabled;
+      if (a.enabled) { a.firedOnce = false; a.snoozeCount = 0; a.snoozedUntil = null; a.snoozeDate = ''; } // re-arm
+      saveAlarms(); renderAlarms();
+      if (!a.enabled && ringingIds.includes(a.id)) dismissOne(a.id); // toggling off stops the ring
+    });
+    const del = document.createElement('button'); del.className = 'btn danger'; del.textContent = '✕'; del.setAttribute('aria-label', 'Delete alarm'); del.title = 'Delete alarm';
+    del.addEventListener('click', () => {
+      if (!confirm(`Delete alarm ${fmtAlarm(a.time)}${a.label ? ' — ' + a.label : ''}?`)) return;
+      const wasRinging = ringingIds.includes(a.id);
+      alarms = alarms.filter(x => x.id !== a.id);
+      saveAlarms(); renderAlarms();
+      if (wasRinging) {
+        ringingIds = ringingIds.filter(x => x !== a.id);
+        if (!ringingIds.length) { stopRingingFx(); ringing.classList.add('hidden'); }
+        else refreshRingingUI();
+      }
+    });
+    acts.append(tst, tg, del); li.append(main, acts);
+    if (ringingIds.includes(a.id)) li.classList.add('locked');
+    li.addEventListener('click', (e) => {
+      if (suppressAlarmClick) return;
+      if (e.target.closest('button, input, select, textarea, .alarm-editor')) return;
+      if (ringingIds.includes(a.id)) return; // ringing alarms can't be edited mid-ring
+      editingId = (editingId === a.id) ? null : a.id;
+      renderAlarms();
+    });
+    // Drag to reorder (manual sort only); suppressed click after a drop.
+    li.draggable = prefs.alarmSort !== 'manual' ? false : true;
+    if (prefs.alarmSort !== 'manual') { /* sorted views lock order */ }
+    else {
+      li.addEventListener('dragstart', (e) => {
+        alarmDragId = a.id; suppressAlarmClick = true; li.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        try { e.dataTransfer.setData('text/plain', String(a.id)); } catch (err) {}
+      });
+      li.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const r = li.getBoundingClientRect();
+        const after = (e.clientY - r.top) > r.height / 2;
+        alarmDropAfter = after;
+        li.classList.toggle('drop-before', !after);
+        li.classList.toggle('drop-after', after);
+      });
+      li.addEventListener('dragleave', () => li.classList.remove('drop-before', 'drop-after'));
+      li.addEventListener('drop', (e) => {
+        e.preventDefault();
+        if (alarmDragId !== null && alarmDragId !== a.id) {
+          const order = alarms.filter(x => x.id !== alarmDragId);
+          order.splice(order.findIndex(x => x.id === a.id) + (alarmDropAfter ? 1 : 0), 0, alarms.find(x => x.id === alarmDragId));
+          alarms = order; saveAlarms(); renderAlarms();
+        }
+      });
+      li.addEventListener('dragend', () => {
+        document.querySelectorAll('.alarm-list li').forEach(c => c.classList.remove('dragging', 'drop-before', 'drop-after'));
+        setTimeout(() => { suppressAlarmClick = false; }, 60);
+      });
+    }
+    if (editingId === a.id) {
+      li.classList.add('editing');
+      li.appendChild(buildAlarmEditor(a));
+    }
+    alarmList.appendChild(li);
   });
 }
+let editingId = null;
+let alarmDragId = null, alarmDropAfter = false, suppressAlarmClick = false;
+function buildAlarmEditor(a) {
+  const ed = document.createElement('div');
+  ed.className = 'alarm-editor';
+  ed.innerHTML = `
+    <div class="row">
+      <input type="time" class="e-time" required />
+      <input type="text" class="e-label" placeholder="Label (optional)" maxlength="40" />
+    </div>
+    <div class="row">
+      <select class="e-repeat" aria-label="Repeat schedule">
+        <option value="once">Once</option>
+        <option value="daily">Every day</option>
+        <option value="weekdays">Weekdays</option>
+        <option value="weekends">Weekends</option>
+        <option value="custom">Custom…</option>
+      </select>
+      <select class="e-snooze" aria-label="Snooze length">
+        <option value="5">+5m</option>
+        <option value="10">+10m</option>
+        <option value="15">+15m</option>
+        <option value="30">+30m</option>
+      </select>
+      <select class="e-category" aria-label="Category">
+        <option value="">Category</option>
+        <option value="personal">🟢 Personal</option>
+        <option value="work">🔵 Work</option>
+        <option value="focus">🟣 Focus</option>
+        <option value="reminder">🟡 Reminder</option>
+        <option value="important">🔴 Important</option>
+      </select>
+      <select class="e-sound" aria-label="Alarm sound"></select>
+      <button class="btn ghost e-preview" title="Preview sound">▶</button>
+    </div>
+    <div class="day-pick hidden"></div>
+    <div class="row">
+      <button class="btn primary e-save">Save</button>
+      <button class="btn ghost e-cancel">Cancel</button>
+    </div>`;
+  const tIn = ed.querySelector('.e-time'); tIn.value = a.time;
+  const lIn = ed.querySelector('.e-label'); lIn.value = a.label || '';
+  const rSel = ed.querySelector('.e-repeat'); rSel.value = a.repeat;
+  const sSel = ed.querySelector('.e-snooze'); sSel.value = String(a.snoozeMin || 5);
+  const cSel = ed.querySelector('.e-category'); cSel.value = a.category || '';
+  const sndSel = ed.querySelector('.e-sound'); sndSel.innerHTML = soundOptions(a.sound || 'chime');
+  ed.querySelector('.e-preview').addEventListener('click', () => previewSound(sndSel));
+  const dayWrap = ed.querySelector('.day-pick');
+  const days = new Set(a.days || []);
+  const paintDays = () => {
+    dayWrap.innerHTML = '';
+    dayWrap.classList.toggle('hidden', rSel.value !== 'custom');
+    DAY_SHORT.forEach((name, d) => {
+      const b = document.createElement('button');
+      b.textContent = name; b.classList.toggle('on', days.has(d));
+      b.addEventListener('click', () => { days.has(d) ? days.delete(d) : days.add(d); paintDays(); });
+      dayWrap.appendChild(b);
+    });
+  };
+  rSel.addEventListener('change', paintDays);
+  paintDays();
+  ed.querySelector('.e-save').addEventListener('click', () => {
+    if (!tIn.value) { alarmStatus.textContent = 'Pick a time first.'; return; }
+    if (rSel.value === 'custom' && !days.size) { alarmStatus.textContent = 'Pick at least one day.'; return; }
+    const scheduleChanged = tIn.value !== a.time || rSel.value !== a.repeat ||
+      [...days].sort().join() !== [...(a.days || [])].sort().join();
+    a.time = tIn.value;
+    a.label = lIn.value.trim();
+    a.repeat = rSel.value;
+    a.days = [...days];
+    a.snoozeMin = +sSel.value || 5;
+    a.category = cSel.value;
+    a.sound = sndSel.value || 'chime';
+    if (scheduleChanged) { a.firedOnce = false; a.snoozeCount = 0; a.snoozedUntil = null; a.snoozeDate = ''; }
+    editingId = null;
+    saveAlarms(); renderAlarms();
+    alarmStatus.textContent = `Alarm updated — ${fmtAlarm(a.time)}.`;
+  });
+  ed.querySelector('.e-cancel').addEventListener('click', () => { editingId = null; renderAlarms(); });
+  return ed;
+}
+// Custom-day chips for the add form
+const customDays = new Set();
+function renderAlarmDays() {
+  alarmDays.innerHTML = '';
+  DAY_SHORT.forEach((name, d) => {
+    const b = document.createElement('button');
+    b.textContent = name; b.classList.toggle('on', customDays.has(d));
+    b.setAttribute('aria-label', 'Repeat ' + ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][d]);
+    b.addEventListener('click', () => { customDays.has(d) ? customDays.delete(d) : customDays.add(d); renderAlarmDays(); checkOverlap(); });
+    alarmDays.appendChild(b);
+  });
+}
+alarmRepeat.addEventListener('change', () => alarmDays.classList.toggle('hidden', alarmRepeat.value !== 'custom'));
+renderAlarmDays();
+function daySet(rep, days) {
+  if (rep === 'daily') return [0, 1, 2, 3, 4, 5, 6];
+  if (rep === 'weekdays') return [1, 2, 3, 4, 5];
+  if (rep === 'weekends') return [0, 6];
+  if (rep === 'custom') return days || [];
+  return [0, 1, 2, 3, 4, 5, 6]; // once: assume any day
+}
+function checkOverlap() {
+  overlapWarn.classList.add('hidden');
+  if (!alarmInput.value) return;
+  const days = alarmRepeat.value === 'custom' ? [...customDays] : daySet(alarmRepeat.value);
+  if (!days.length) return;
+  const hits = alarms.filter(a => a.enabled && a.time === alarmInput.value &&
+    daySet(a.repeat, a.days).some(d => days.includes(d)));
+  if (!hits.length) return;
+  const names = hits.slice(0, 2).map(a => a.label ? `'${a.label}' (${fmtAlarm(a.time)})` : fmtAlarm(a.time));
+  overlapWarn.textContent = `⚠ Overlaps with ${names.join(', ')}${hits.length > 2 ? ` +${hits.length - 2} more` : ''} — adding anyway is fine.`;
+  overlapWarn.classList.remove('hidden');
+}
+alarmInput.addEventListener('input', checkOverlap);
+alarmInput.addEventListener('change', checkOverlap);
+alarmRepeat.addEventListener('change', checkOverlap);
+document.getElementById('alarmSound').innerHTML = soundOptions('chime');
+document.getElementById('alarmPreview').addEventListener('click', () =>
+  previewSound(document.getElementById('alarmSound')));
 document.getElementById('alarmAdd').addEventListener('click', () => {
   if (!alarmInput.value) { alarmStatus.textContent = 'Pick a time first.'; return; }
+  if (alarmRepeat.value === 'custom' && !customDays.size) { alarmStatus.textContent = 'Pick at least one day.'; return; }
+  checkOverlap();
   const added = alarmInput.value;
-  alarms.push({ id: Date.now(), time: added, enabled: true });
+  const catSel = document.getElementById('alarmCategory');
+  alarms.push({
+    id: Date.now(), time: added, enabled: true,
+    label: alarmLabelInput.value.trim(),
+    category: catSel ? catSel.value : '',
+    sound: document.getElementById('alarmSound').value || 'chime',
+    repeat: alarmRepeat.value,
+    days: [...customDays],
+    snoozeMin: +alarmSnoozeLen.value || 5,
+    snoozeCount: 0, snoozedUntil: null, snoozeDate: '',
+  });
   saveAlarms(); renderAlarms(); alarmStatus.textContent = `Alarm set for ${fmtAlarm(added)}.`;
-  alarmInput.value = '00:00'; // reset the box to 12:00 AM for the next alarm
+  alarmInput.value = ''; // empty box so 12:00 AM can't be added by accident
+  alarmLabelInput.value = '';
+  alarmRepeat.value = 'once';
+  alarmSnoozeLen.value = '5';
+  alarmDays.classList.add('hidden');
+  overlapWarn.classList.add('hidden');
+  customDays.clear(); renderAlarmDays();
 });
 // Ringing effects: same sound as the timer, repeated until acknowledged,
 // plus a flashing tab title so the alarm is noticed even in another tab.
@@ -649,48 +926,254 @@ function stopRingingFx() {
   if (titleFlashId) clearInterval(titleFlashId); titleFlashId = null;
   document.title = BASE_TITLE;
   ringingActive = false;
+  testRingIds.clear();
   alarmWidget.classList.add('hidden');
+  ambBtn.disabled = false;
   if (alarmNavBtn) alarmNavBtn.classList.remove('alarm-fire');
 }
-function startRinging(timeLabel) {
-  stopRingingFx();
-  ringingTime.textContent = timeLabel;
+let ringingIds = [];
+function ringShort(a) {
+  // A ringing snooze announces its new time, not the original one.
+  const t = a.snoozedUntil ? fmtAlarm(a.snoozedUntil) : fmtAlarm(a.time);
+  return a.label ? `${t} — ${a.label}` : t;
+}
+function ringingAlarms() {
+  return ringingIds.map(id => alarms.find(x => x.id === id)).filter(Boolean);
+}
+function ringEventLabel() {
+  const list = ringingAlarms();
+  if (!list.length) return '';
+  const tag = (list.length && list.every(a => testRingIds.has(a.id))) ? ' · Test' : '';
+  if (list.length === 1) return ringShort(list[0]) + tag;
+  const names = list.map(a => a.label || fmtAlarm(a.time));
+  return `${list.length} alarms — ${names.slice(0, 2).join(' · ')}${names.length > 2 ? ` +${names.length - 2}` : ''}${tag}`;
+}
+function refreshRingingUI() {
+  const list = ringingAlarms();
+  const multi = list.length > 1;
+  document.getElementById('dismissAllRinging').style.display = multi ? '' : 'none';
+  document.getElementById('widgetDismissAll').style.display = multi ? '' : 'none';
+  const allTest = list.length > 0 && list.every(a => testRingIds.has(a.id));
+  const head = document.getElementById('ringingHead');
+  if (head) head.textContent = (multi ? `🔔 ${list.length} alarms ringing` : '🔔 Alarm ringing') + (allTest ? ' · Test' : '');
+  const rl = document.getElementById('ringingList');
+  rl.innerHTML = '';
+  list.forEach(a => {
+    const row = document.createElement('div'); row.className = 'ring-row';
+    const info = document.createElement('div'); info.className = 'ring-info';
+    const b = document.createElement('b');
+    b.textContent = list.length === 1 ? ringShort(a) : (a.label || 'N/A');
+    info.appendChild(b);
+    if (a.snoozeCount > 0) {
+      const s = document.createElement('span'); s.className = 'ring-sub2';
+      s.textContent = `Snoozed ${a.snoozeCount}x`;
+      info.appendChild(s);
+    }
+    const btns = document.createElement('div'); btns.className = 'ring-btns';
+    const sn = document.createElement('button'); sn.className = 'btn ghost'; sn.textContent = `Snooze +${a.snoozeMin || 5}m`;
+    sn.addEventListener('click', () => snoozeOne(a.id));
+    const di = document.createElement('button'); di.className = 'btn danger'; di.textContent = '✕';
+    di.setAttribute('aria-label', 'Dismiss ' + ringShort(a));
+    di.addEventListener('click', () => dismissOne(a.id));
+    btns.append(sn, di);
+    row.append(info, btns);
+    rl.appendChild(row);
+  });
+  // One shared time goes in the header; rows show just their labels.
+  const sameTime = new Set(list.map(a => a.time)).size === 1;
+  const wHead = document.getElementById('widgetHead');
+  if (wHead) {
+    if (!list.length) wHead.textContent = '🔔 Alarm';
+    else if (list.length === 1) wHead.textContent = `🔔 ${list[0].snoozedUntil ? fmtAlarm(list[0].snoozedUntil) : fmtAlarm(list[0].time)}`;
+    else if (sameTime) wHead.textContent = `🔔 ${fmtAlarm(list[0].time)} · ${list.length}`;
+    else wHead.textContent = `🔔 ${list.length} alarms`;
+    if (list.length && list.every(a => testRingIds.has(a.id))) wHead.textContent += ' · Test';
+  }
+  const wl = document.getElementById('widgetList');
+  wl.innerHTML = '';
+  list.forEach(a => {
+    const row = document.createElement('div'); row.className = 'w-row';
+    const mins = widgetSnoozeLenFor(a);
+    const label = list.length === 1 ? (a.label || 'N/A') : (sameTime ? (a.label || 'N/A') : ringShort(a));
+    const t = document.createElement('span'); t.className = 'w-time'; t.textContent = label; t.title = ringShort(a);
+    const sn = document.createElement('button'); sn.className = 'icon-btn'; sn.textContent = '💤';
+    sn.title = `Snooze +${mins}m`; sn.setAttribute('aria-label', 'Snooze ' + ringShort(a));
+    sn.addEventListener('click', () => snoozeOne(a.id, mins));
+    const di = document.createElement('button'); di.className = 'icon-btn'; di.textContent = '✕';
+    di.setAttribute('aria-label', 'Dismiss ' + ringShort(a));
+    di.addEventListener('click', () => dismissOne(a.id));
+    row.append(t, sn, di);
+    wl.appendChild(row);
+  });
+}
+let ringSound = 'chime';
+function startRingingEvent(ids) {
+  const fresh = !ringingIds.length;
+  ids.forEach(id => { if (!ringingIds.includes(id)) ringingIds.push(id); });
+  // Multi-alarm events speak with the first alarm's voice.
+  if (fresh) {
+    const first = ringingAlarms()[0];
+    ringSound = (first && first.sound) || 'chime';
+  }
+  if (editingId !== null && ids.includes(editingId)) { editingId = null; renderAlarms(); }
+  if (fresh) { widgetSnoozeOverride = null; widgetSnoozeLen.value = ''; }
+  if (!ringingIds.length) return;
   ringing.classList.remove('hidden');
-  // Floating quick-access widget; the focused Clock/Timer/Stopwatch view stays put.
-  alarmWidgetTime.textContent = timeLabel;
   alarmWidget.classList.remove('hidden');
-  beep(3); // same sound as the timer
+  ambBtn.disabled = true; // keep Ambience clear of the widget until acknowledged
+  toggleAmbPanel(false); // never cover the widget with the panel
+  beep(3, ringSound);
   ringingActive = true;
   if (alarmNavBtn) alarmNavBtn.classList.add('alarm-fire');
-  ringRepeatId = setInterval(() => beep(3), 4000);
-  let on = false;
-  titleFlashId = setInterval(() => {
-    document.title = on ? `🔔 Alarm — ${timeLabel}` : BASE_TITLE;
-    on = !on;
-  }, 1000);
+  if (!ringRepeatId) ringRepeatId = setInterval(() => beep(3, ringSound), 4000);
+  if (!titleFlashId) {
+    let on = false;
+    titleFlashId = setInterval(() => {
+      document.title = on ? `🔔 ${ringEventLabel()}` : BASE_TITLE;
+      on = !on;
+    }, 1000);
+  }
+  refreshRingingUI();
 }
+// Test rings: full experience, zero schedule impact. Testing one alarm also
+// pulls in every other enabled alarm at the same minute, so multi-alarm
+// events rehearse exactly as they would fire (dismiss anyone to narrow it
+// down). This beats manual multi-select: no selection state to manage, and
+// the group is always the true same-minute set.
+const testRingIds = new Set();
+function testAlarm(id) {
+  const a = alarms.find(x => x.id === id);
+  if (!a || !a.enabled) return;
+  // Same minute AND scheduled today — otherwise the rehearsal lies about
+  // which alarms would truly co-fire. The tapped row always plays solo;
+  // the group joins only when it is itself scheduled today.
+  const now = new Date();
+  const grouped = dayMatches(a, now);
+  alarms
+    .filter(x => x.enabled && x.time === a.time && !ringingIds.includes(x.id) &&
+      (x.id === a.id || (grouped && dayMatches(x, now))))
+    .forEach(x => testRingIds.add(x.id));
+  startRingingEvent([...testRingIds]);
+}
+function dismissOne(id) {
+  const a = alarms.find(x => x.id === id);
+  ringingIds = ringingIds.filter(x => x !== id);
+  if (testRingIds.has(id)) testRingIds.delete(id); // test rings never touch the schedule
+  else if (a) {
+    a.snoozeCount = 0; a.snoozedUntil = null; a.snoozeDate = '';
+    if (a.repeat === 'once') a.enabled = false; // back to original time, turned off
+  }
+  saveAlarms(); renderAlarms();
+  if (!ringingIds.length) { stopRingingFx(); ringing.classList.add('hidden'); }
+  else refreshRingingUI();
+}
+function dismissAllRinging() { [...ringingIds].forEach(dismissOne); }
+function applySnooze(a, mins) {
+  const d = new Date(Date.now() + mins * 60000);
+  a.snoozedUntil = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  a.snoozeDate = dateStr(d);
+  a.snoozeCount = (a.snoozeCount || 0) + 1;
+}
+function snoozeOne(id, minutes) {
+  const a = alarms.find(x => x.id === id);
+  if (!a) return;
+  ringingIds = ringingIds.filter(x => x !== id);
+  if (testRingIds.has(id)) {
+    // Test snooze only silences; schedule untouched.
+    testRingIds.delete(id);
+    alarmStatus.textContent = 'Test silenced.';
+  } else {
+    applySnooze(a, minutes || a.snoozeMin || 5);
+    alarmStatus.textContent = `Snoozed ${a.snoozeCount}x · Next ring ${fmtAlarm(a.snoozedUntil)}`;
+  }
+  saveAlarms(); renderAlarms();
+  if (!ringingIds.length) { stopRingingFx(); ringing.classList.add('hidden'); }
+  else refreshRingingUI();
+}
+// Next upcoming ring for one alarm (pending snooze first, then schedule), else null.
+// Snooze wins even for retired once-alarms so the countdown never goes missing.
+function nextOccurrence(a, now) {
+  if (!a.enabled || ringingIds.includes(a.id)) return null;
+  if (a.snoozedUntil && a.snoozeDate) {
+    const d = new Date(`${a.snoozeDate}T${a.snoozedUntil}:00`);
+    if (d > now) return d;
+  }
+  if (a.repeat === 'once' && a.firedOnce) return null;
+  for (let off = 0; off < 8; off++) {
+    const dt = new Date(now.getTime() + off * 86400000);
+    if (!dayMatches(a, dt)) continue;
+    const [h, m] = a.time.split(':').map(Number);
+    const cand = new Date(dt); cand.setHours(h, m, 0, 0);
+    if (cand > now) return cand;
+  }
+  return null;
+}
+function countdownText(a, now) {
+  now = now || new Date();
+  const nxt = nextOccurrence(a, now);
+  if (!nxt) return '';
+  const s = Math.max(0, Math.round((nxt - now) / 1000));
+  const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60);
+  if (h > 0) return `in ${h}h ${m}m`;
+  if (m > 0) return `in ${m}m`;
+  return `in ${s}s`;
+}
+function updateAlarmFooter() {
+  if (!alarms.length) { alarmStatus.textContent = 'No alarms set.'; return; }
+  const now = new Date();
+  let best = null, bestA = null;
+  for (const a of alarms) {
+    const nxt = nextOccurrence(a, now);
+    if (nxt && (!best || nxt < best)) { best = nxt; bestA = a; }
+  }
+  const on = alarms.filter(a => a.enabled).length;
+  if (best) alarmStatus.textContent = `Next: ${fmtAlarm(`${pad(best.getHours())}:${pad(best.getMinutes())}`)}${bestA.label ? ' — ' + bestA.label : ''} · ${alarms.length} alarm(s), ${on} active`;
+  else alarmStatus.textContent = `${alarms.length} alarm(s), ${on} active.`;
+}
+function tickAlarmCountdowns(now) {
+  if (!prefs.showAlarmCountdown) return;
+  document.querySelectorAll('.alarm-count').forEach(el => {
+    const a = alarms.find(x => String(x.id) === el.dataset.id);
+    el.textContent = a ? countdownText(a, now) : '';
+    if (el.textContent) el.textContent = ' · ' + el.textContent;
+  });
+}
+function dayMatches(a, now) {
+  const d = now.getDay();
+  if (a.repeat === 'daily') return true;
+  if (a.repeat === 'weekdays') return d >= 1 && d <= 5;
+  if (a.repeat === 'weekends') return d === 0 || d === 6;
+  if (a.repeat === 'custom') return (a.days || []).includes(d);
+  return true; // once
+}
+function dateStr(d) { return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
 function checkAlarms(now) {
   const key = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
-  const match = alarms.find(a => a.enabled && a.time === key);
-  if (match && lastFiredKey !== key + match.id) {
-    lastFiredKey = key + match.id;
-    startRinging(fmtAlarm(match.time));
+  const today = dateStr(now);
+  const due = [];
+  for (const a of alarms) {
+    if (!a.enabled || ringingIds.includes(a.id) || testRingIds.has(a.id)) continue;
+    // Per-alarm minute mark: snoozing/dismissing mid-minute can never re-fire it.
+    if (a._firedMark === `${today}|${key}`) continue;
+    if (a.snoozedUntil && a.snoozedUntil === key && a.snoozeDate === today) {
+      a._firedMark = `${today}|${key}`;
+      due.push(a.id);
+    } else if (a.time === key && dayMatches(a, now) && !(a.repeat === 'once' && a.firedOnce)) {
+      a._firedMark = `${today}|${key}`;
+      a.snoozeCount = 0; a.snoozedUntil = null; a.snoozeDate = ''; // fresh ring resets the snooze chain
+      if (a.repeat === 'once') a.firedOnce = true; // stays on while ringing/snoozed; off on dismiss
+      due.push(a.id);
+    }
   }
+  if (due.length) { saveAlarms(); renderAlarms(); startRingingEvent(due); }
 }
-document.getElementById('widgetDismiss').addEventListener('click', () => {
-  stopRingingFx(); ringing.classList.add('hidden');
-});
-document.getElementById('widgetSnooze').addEventListener('click', () => {
-  document.getElementById('snoozeAlarm').click();
-});
-document.getElementById('dismissAlarm').addEventListener('click', () => {
-  stopRingingFx(); ringing.classList.add('hidden');
-});
-document.getElementById('snoozeAlarm').addEventListener('click', () => {
-  stopRingingFx(); ringing.classList.add('hidden');
-  const d = new Date(Date.now() + 5 * 60000);
-  alarms.push({ id: Date.now(), time: `${pad(d.getHours())}:${pad(d.getMinutes())}`, enabled: true });
-  saveAlarms(); renderAlarms();
+document.getElementById('dismissAllRinging').addEventListener('click', dismissAllRinging);
+document.getElementById('widgetDismissAll').addEventListener('click', dismissAllRinging);
+let widgetSnoozeOverride = null;
+function widgetSnoozeLenFor(a) { return widgetSnoozeOverride || a.snoozeMin || 5; }
+widgetSnoozeLen.addEventListener('change', () => {
+  widgetSnoozeOverride = widgetSnoozeLen.value ? +widgetSnoozeLen.value : null;
+  refreshRingingUI(); // row 💤 buttons adopt the new length
 });
 renderAlarms();
 
@@ -866,6 +1349,14 @@ function setZones(open) {
 }
 zoneBtn.addEventListener('click', () => { setZones(); zoneBtn.blur(); });
 zoneSort.addEventListener('change', () => { zprefs.sort = zoneSort.value; savePrefs(); renderZones(); });
+const alarmSortSel = document.getElementById('alarmSort');
+const alarmCountBtn = document.getElementById('alarmCountBtn');
+alarmSortSel.addEventListener('change', () => { prefs.alarmSort = alarmSortSel.value; savePrefs(); renderAlarms(); });
+alarmCountBtn.addEventListener('click', () => {
+  prefs.showAlarmCountdown = !prefs.showAlarmCountdown; savePrefs();
+  alarmCountBtn.classList.toggle('active', prefs.showAlarmCountdown);
+  renderAlarms();
+});
 zoneOffsetBtn.addEventListener('click', () => { zprefs.showOffset = !zprefs.showOffset; savePrefs(); syncZoneControls(); renderZones(); });
 zoneFormatBtn.addEventListener('click', () => { zprefs.h12 = !zprefs.h12; savePrefs(); syncZoneControls(); renderZoneTimes(); });
 zoneSecsBtn.addEventListener('click', () => { zprefs.showSeconds = !zprefs.showSeconds; savePrefs(); syncZoneControls(); renderZoneTimes(); });
@@ -1447,6 +1938,7 @@ const ambPanel = document.getElementById('ambPanel');
 const ambList = document.getElementById('ambList');
 const ambVol = document.getElementById('ambVol');
 const ambVolVal = document.getElementById('ambVolVal');
+const NOTE_SVG = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l10-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>';
 const ambViz = document.getElementById('ambViz');
 const ambVctx = ambViz.getContext('2d');
 let vizRaf = null;
@@ -1471,7 +1963,7 @@ function syncAmbUI() {
   const n = ambActive.size;
   ambBtn.classList.toggle('playing', n > 0);
   if (!n) {
-    ambIco.textContent = '🎵'; ambLabel.textContent = 'Ambience';
+    ambIco.innerHTML = NOTE_SVG; ambLabel.textContent = 'Ambience';
   } else if (n === 1) {
     const d = AMB_SOUNDS.find(x => x.id === [...ambActive.keys()][0]);
     ambIco.textContent = ambPaused ? '▶' : '⏸';
@@ -1484,6 +1976,7 @@ function syncAmbUI() {
 }
 function toggleAmbPanel(force) {
   const open = force !== undefined ? force : !ambPanel.classList.contains('open');
+  if (open && !alarmWidget.classList.contains('hidden')) return; // widget has the floor
   ambPanel.classList.toggle('open', open);
   kickViz();
 }
@@ -1625,6 +2118,15 @@ function toggleAbout(force) {
 }
 document.getElementById('infoBtn').addEventListener('click', () => { toggleHelp(false); toggleAbout(); });
 document.getElementById('aboutX').addEventListener('click', () => toggleAbout(false));
+document.querySelector('#aboutModal .about-body').addEventListener('click', (e) => {
+  const h = e.target.closest('h3[data-collapsible]');
+  if (h && h.parentElement) h.parentElement.classList.toggle('collapsed');
+});
+aboutModal.querySelectorAll('details').forEach(d => d.addEventListener('toggle', () => {
+  if (!d.open) return;
+  const sec = d.closest('section');
+  if (sec) sec.querySelectorAll('details[open]').forEach(x => { if (x !== d) x.removeAttribute('open'); });
+}));
 aboutModal.addEventListener('click', (e) => { if (e.target === aboutModal) toggleAbout(false); });
 
 // ---------- Keyboard shortcuts ----------
@@ -1703,6 +2205,8 @@ if (prefs.sky === true) applySky();
 if (zprefs.h12 === null || zprefs.h12 === undefined) zprefs.h12 = is12Hour;
 document.body.dataset.zones = zprefs.open ? 'open' : 'closed';
 syncZoneControls();
+alarmSortSel.value = prefs.alarmSort || 'manual';
+alarmCountBtn.classList.toggle('active', prefs.showAlarmCountdown === true);
 syncDockWidth();
 if (zprefs.open) renderZones();
 setClockMode(prefs.clockMode);
@@ -1715,7 +2219,7 @@ applyThemeIcon();
 // 1s colon blink is phase-locked to. Unlike setInterval(..., 1000), which
 // fires late and drifts, this keeps digits and blinkers in step.
 function clockLoop() {
-  updateClock();
+  try { updateClock(); } catch (e) { /* the clock must never stop ticking */ }
   setTimeout(clockLoop, 1000 - (Date.now() % 1000));
 }
 // Pomodoro init: config inputs, face, tasks, nav overflow arrows
