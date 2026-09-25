@@ -15,7 +15,7 @@ const DEFAULT_ZONE_ORDER = ZONES.map(z => z.id);
 
 // ---------- Prefs ----------
 const PREF_KEY = 'modern-clock-prefs';
-let prefs = { theme: 'dark', variant: 'glass', sky: true, clockMode: 'digital', dial: 'arabic', sweep: 'smooth', is12Hour: false, ambVol: 70, alarmSort: 'manual', showAlarmCountdown: false,
+let prefs = { theme: 'dark', variant: 'glass', sky: true, clockMode: 'digital', dial: 'arabic', sweep: 'smooth', is12Hour: false, ambVol: 70, alarmSort: 'manual', showAlarmCountdown: false, landscape: 'hills',
   zones: { order: [...DEFAULT_ZONE_ORDER], sort: 'time', showOffset: true, h12: null, showSeconds: true, open: false },
   pomo: { workMin: 25, shortMin: 5, longMin: 15, cycle: 4, autoBreaks: false, autoWork: false } };
 try {
@@ -327,7 +327,7 @@ function applySky(now = new Date()) {
     s.setProperty('--digit-from', P.dFrom);
     s.setProperty('--digit-to', P.dTo);
     s.setProperty('--stars-opacity', '0');
-    s.setProperty('--rays-opacity', '0');
+    s.setProperty('--haze-opacity', '0');
     document.body.dataset.skyInk = 'light';
     return;
   }
@@ -348,12 +348,12 @@ function applySky(now = new Date()) {
   s.setProperty('--digit-to', mixHex(a.dTo, b.dTo, f));
   // Palette-driven contrast: light ink on dark skies, dark ink on bright ones.
   document.body.dataset.skyInk = (luminance(top) + luminance(bottom)) / 2 > 0.28 ? 'dark' : 'light';
-  // Stars fade in at night, soft sun rays by day (both eased, never abrupt).
+  // Stars fade in at night, haze banks up by day (both eased, never abrupt).
   const h24 = t % 24;
   const sstep = (e0, e1, x) => { const k = Math.min(1, Math.max(0, (x - e0) / (e1 - e0))); return k * k * (3 - 2 * k); };
   const night = (h24 >= 21 || h24 < 4) ? 1 : h24 < 8 ? 1 - sstep(4, 8, h24) : h24 < 17 ? 0 : sstep(17, 21, h24);
   s.setProperty('--stars-opacity', (Math.pow(night, 1.4) * 0.9).toFixed(3));
-  s.setProperty('--rays-opacity', (Math.pow(1 - night, 2) * 0.55).toFixed(3));
+  s.setProperty('--haze-opacity', (Math.pow(1 - night, 1.3) * 0.9).toFixed(3));
 }
 let skyPrevTheme = null;
 function setSky(on) {
@@ -403,6 +403,44 @@ function wavePath(amp, phase) {
     svg.appendChild(path);
     wrap.appendChild(svg);
     layer.appendChild(wrap);
+  });
+})();
+// Static horizon landscapes: hills, mountains, city silhouettes.
+const LANDSCAPES = ['hills', 'mountains', 'city', 'off'];
+function setLandscape(mode) {
+  prefs.landscape = mode; savePrefs();
+  document.body.dataset.landscape = mode;
+}
+(function buildLandscape() {
+  const layer = document.getElementById('landscape');
+  if (!layer) return;
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 1440 400');
+  svg.setAttribute('preserveAspectRatio', 'xMidYMax slice');
+  const mk = (tag, attrs, parent) => {
+    const el = document.createElementNS(NS, tag);
+    for (const k in attrs) el.setAttribute(k, attrs[k]);
+    parent.appendChild(el);
+    return el;
+  };
+  const hills = mk('g', { 'data-land': 'hills', id: 'land-hills' }, svg);
+  // Far range flows upward with taller peaks; near range descends the other way.
+  mk('path', { d: 'M0,200 C180,280 260,180 420,170 C560,162 620,220 760,215 C900,210 960,140 1120,130 C1260,122 1360,170 1440,200 L1440,400 L0,400 Z', class: 'land-far' }, hills);
+  mk('path', { d: 'M0,280 C100,285 200,215 300,215 C400,215 440,285 540,285 C640,285 660,250 760,250 C860,250 880,330 960,330 C1040,330 1090,290 1190,290 C1290,290 1340,305 1440,250 L1440,400 L0,400 Z', class: 'land-near' }, hills);
+  const mtn = mk('g', { 'data-land': 'mountains', id: 'land-mountains' }, svg);
+  // Smoothly rounded summits — curves only, no sharp points.
+  mk('path', { d: 'M0,190 L95,175 Q107,171 119,175 L195,220 L275,150 Q287,137 299,150 L375,225 L465,230 L545,180 Q557,172 569,180 L645,230 L735,180 L815,160 Q827,157 839,160 L915,180 L1005,210 L1085,168 Q1097,160 1109,168 L1185,240 L1275,210 L1355,190 Q1367,187 1379,192 L1440,210 L1440,400 L0,400 Z', class: 'land-far' }, mtn);
+  mk('path', { d: 'M0,400 L0,330 L140,275 L220,220 Q232,210 244,220 L330,295 L450,330 L530,245 Q544,236 554,240 L640,260 L760,325 L840,265 Q849,262 864,268 L950,320 L1070,340 L1150,260 Q1154,256 1174,260 L1260,280 L1360,310 L1440,330 L1440,400 Z', class: 'land-near' }, mtn);
+  const city = mk('g', { 'data-land': 'city', id: 'land-city' }, svg);
+  // Far range: low band broken by a few tall slabs. Near range: varied blocks,
+  // some running together — no metronome alternation, no windows anywhere.
+  mk('path', { d: 'M0,400 L0,170 L120,170 L120,200 L200,200 L200,250 L300,250 L300,220 L420,220 L420,180 L540,180 L540,150 L680,150 L680,210 L790,210 L790,250 L900,250 L900,190 L990,190 L990,170 L1130,170 L1130,250 L1210,250 L1210,230 L1300,230 L1300,190 L1440,190 L1440,400 Z', class: 'land-far' }, city);
+  mk('path', { d: 'M0,400 L0,240 L90,240 L90,310 L170,310 L170,270 L250,270 L250,330 L310,330 L310,270 L410,270 L410,220 L520,220 L520,260 L600,260 L600,300 L710,300 L710,250 L800,250 L800,330 L870,330 L870,285 L960,285 L960,200 L1070,200 L1070,285 L1150,285 L1150,315 L1250,315 L1250,270 L1340,270 L1340,220 L1440,220 L1440,400 Z', class: 'land-near' }, city);
+  layer.appendChild(svg);
+  layer.addEventListener('click', () => {
+    const next = LANDSCAPES[(LANDSCAPES.indexOf(prefs.landscape) + 1) % LANDSCAPES.length];
+    setLandscape(next);
   });
 })();
 // Soft bubble/cloud field drifting behind the pomodoro dial.
@@ -2200,6 +2238,7 @@ savePrefs();
 document.body.dataset.theme = prefs.theme;
 document.body.dataset.variant = prefs.variant === 'solid' ? 'solid' : 'glass';
 document.body.dataset.sky = prefs.sky === true ? 'on' : 'off';
+document.body.dataset.landscape = LANDSCAPES.includes(prefs.landscape) ? prefs.landscape : 'hills';
 document.body.dataset.sweep = prefs.sweep;
 if (prefs.sky === true) applySky();
 if (zprefs.h12 === null || zprefs.h12 === undefined) zprefs.h12 = is12Hour;

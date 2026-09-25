@@ -681,8 +681,8 @@ body[data-wall="on"] .second-hand {
 }
 body[data-wall="on"] .digital-overlay { font-size: clamp(0.9rem, 3vmin, 1.8rem); bottom: 20%; }
 
-/* ---- Sky extras: twinkling stars at night, soft sun rays by day (subtle) ---- */
-.stars, .rays { position: absolute; inset: 0; overflow: hidden; pointer-events: none; opacity: 0; }
+/* ---- Sky extras: twinkling stars at night, haze + grain by day (subtle) ---- */
+.stars, .haze, .grain { position: absolute; inset: 0; overflow: hidden; pointer-events: none; opacity: 0; }
 .stars { transition: opacity 2s; }
 .stars i {
   position: absolute; border-radius: 50%; background: #fff;
@@ -692,13 +692,33 @@ body[data-wall="on"] .digital-overlay { font-size: clamp(0.9rem, 3vmin, 1.8rem);
 .stars i.neb { filter: blur(3px); opacity: 0.5; box-shadow: none; }
 @keyframes twinkle { from { opacity: 0.2; } to { opacity: 0.9; } }
 body[data-sky="on"] .stars { opacity: var(--stars-opacity, 0); }
-.rays {
-  transition: opacity 2s;
-  background:
-    radial-gradient(circle at 72% 14%, rgba(255, 252, 235, 0.5), rgba(255, 244, 200, 0.12) 22%, transparent 42%),
-    repeating-conic-gradient(from -12deg at 72% 14%, rgba(255, 250, 225, 0.05) 0deg 5deg, transparent 5deg 13deg);
+.haze { transition: opacity 2s; }
+.haze::before {
+  content: ""; position: absolute; left: -10%; right: -10%; top: 50%; height: 48%;
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.2) 45%, rgba(255, 255, 255, 0.32) 62%, transparent);
+  filter: blur(30px);
 }
-body[data-sky="on"] .rays { opacity: var(--rays-opacity, 0); }
+body[data-sky="on"] .haze { opacity: var(--haze-opacity, 0); }
+.grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  opacity: 0; transition: opacity 2s;
+}
+body[data-sky="on"] .grain { opacity: 0.07; }
+/* Clickable horizon landscapes (static, day and night) */
+.landscape { position: absolute; left: 0; right: 0; bottom: 0; height: 42vh; cursor: pointer; }
+.landscape svg { width: 100%; height: 100%; display: block; }
+#landscape g[data-land] { visibility: hidden; opacity: 0; transition: opacity 0.3s ease; }
+body[data-landscape="hills"] #land-hills,
+body[data-landscape="mountains"] #land-mountains,
+body[data-landscape="city"] #land-city { visibility: visible; opacity: 1; }
+body[data-view="pomodoro"][data-sky="on"] .landscape { display: none; }
+.land-far, .land-near { transition: fill 2s; }
+.land-far { fill: rgba(30, 41, 59, 0.45); }
+.land-near { fill: rgba(15, 23, 42, 0.6); }
+body[data-theme="light"] .land-far { fill: rgba(2, 6, 23, 0.3); }
+body[data-theme="light"] .land-near { fill: rgba(2, 6, 23, 0.45); }
+.land-win { fill: #fcd34d; opacity: 0.35; }
+body[data-sky-ink="light"] .land-win { opacity: 0.85; }
 
 /* ---- Time-of-day sky background (independent of glass/solid + light/dark) ---- */
 body[data-variant][data-sky="on"] { --bg: linear-gradient(165deg, var(--sky-top), var(--sky-bottom)); }
@@ -985,8 +1005,8 @@ body[data-view="pomodoro"][data-sky="on"] .bubbles { opacity: 1; }
   88% { opacity: var(--bo, 0.5); }
   to { transform: translateY(-112vh) translateX(4vw); opacity: 0; }
 }
-/* No sun rays while focusing — bubbles take their place */
-body[data-view="pomodoro"] .rays { opacity: 0; }
+/* No day haze while focusing — bubbles and waves take its place */
+body[data-view="pomodoro"] .haze { opacity: 0; }
 /* Focus-phase waves: layered abstract swells (bubbles rest during focus) */
 .mist { position: absolute; inset: 0; overflow: hidden; pointer-events: none; opacity: 0; transition: opacity 2.5s; }
 body[data-view="pomodoro"][data-pomo-phase="work"][data-sky="on"] .mist { opacity: 1; }

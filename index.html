@@ -12,7 +12,9 @@
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
     <div class="blob blob-3"></div>
-    <div class="rays" id="rays" aria-hidden="true"></div>
+    <div class="haze" id="haze" aria-hidden="true"></div>
+    <div class="grain" id="grain" aria-hidden="true"></div>
+    <div class="landscape" id="landscape"></div>
     <div class="bubbles" id="bubbles" aria-hidden="true"></div>
     <div class="mist" id="mist" aria-hidden="true"></div>
   </div>
@@ -387,7 +389,7 @@
         <div class="banner-text">
           <h2 id="aboutTitle">Aionic Clock</h2>
           <p class="tagline">&ldquo;<span id="taglineText"></span><span class="caret"></span>&rdquo;</p>
-          <span class="ver">v1.1.0</span>
+          <span class="ver">v1.2.0</span>
         </div>
       </div>
       <div class="about-body">
@@ -418,7 +420,7 @@
             <div><b>⏰ Alarms</b><p>Never miss the moment.</p><ul><li>Labels, repeats, categories &amp; five tones</li><li>Simultaneous alarms ring as one event</li><li>In-row editor, overlap warnings, live countdowns</li><li>Test mode triggers alarm rehearsals</li><li>Floating widget, flashing titles</li><li>Saved locally, box resets after adding</li></ul></div>
             <div><b>🍅 Pomodoro</b><p>Focus in flavorful cycles.</p><ul><li>Focus, short &amp; long phases, depleting ring</li><li>DND by pressing the dial, ⏭ skip rotation</li><li>Tasks with priorities &amp; 🍅 block estimates</li><li>Auto-start options, session dots</li><li>Phase-matched skies, active-task headline</li><li>Configurable minutes &amp; long break intervals</li></ul></div>
             <div><b>🌐 World clock</b><p>Ten zones at a glance.</p><ul><li>Day-phase emoji per local hour</li><li>Drag order; sort by city, country, time</li><li>Click-to-preview on the main dial</li><li>Country, date &amp; GMT offsets</li></ul></div>
-            <div><b>🌌 Living sky</b><p>Weather for your wallpaper.</p><ul><li>24-hour gradient cycle with stars &amp; rays</li><li>Light &amp; dark visual themes</li><li>Per-phase focus palettes: waves + bubbles</li><li>Glass or solid soft-color cards</li></ul></div>
+            <div><b>🌌 Living sky</b><p>Weather for your wallpaper.</p><ul><li>24-hour gradient cycle with stars &amp; haze</li><li>Clickable horizon landscapes, day and night</li><li>Light &amp; dark visual themes</li><li>Per-phase focus palettes: waves + bubbles</li><li>Glass or solid soft-color cards</li></ul></div>
             <div><b>⛶ Wall mode</b><p>Turn any screen into a clock.</p><ul><li>Fullscreen with auto-hiding chrome</li><li>Contracting analog face, solid-ink digits</li><li>In-face date pill on analog</li></ul></div>
             <div><b>🎧 Ambience</b><p>Eight rooms of procedural sound.</p><ul><li>Storm, dawn, leaves, brook, frogs, bamboo, night, fire</li><li>Layer mixer, auto-DJ rotation, Play All</li><li>Live color-coded visualizer</li></ul></div>
             <div><b>⌨️ Keyboard-first</b><p>Mouse optional.</p><ul><li>Full shortcut map under <kbd>?</kbd>/<kbd>H</kbd></li><li>Display keys stay silent in wall mode</li></ul></div>
@@ -443,7 +445,7 @@
           <div class="feat-grid">
             <div><b>🍩 Dial press</b><span>Pressing the Pomodoro face toggles Do Not Disturb — no button needed.</span></div>
             <div><b>👆 Secret clock controls</b><span>Click analog numerals to cycle dials; the center dot flips sweep/tick.</span></div>
-            <div><b>👻 Hover ghosts</b><span>Hovering the main analog face reveals its digital readout; hovering volume reveals its level.</span></div>
+            <div><b>👻 Hover ghosts</b><span>Hovering the main analog face reveals its digital readout; volume reveals its level.</span></div>
             <div><b>🥞 Stacking presets</b><span>Tapping a timer preset repeatedly piles time on instead of replacing it.</span></div>
             <div><b>⏭ Skip stepping</b><span>Skip on a running Pomodoro jumps to whatever phase the cycle order dictates next.</span></div>
             <div><b>🔀 Restless DJ</b><span>Ambience shuffle never sits still — it rotates a fresh track in every minute or so.</span></div>
@@ -451,6 +453,7 @@
             <div><b>🌍 One-click time travel</b><span>Clicking a world zone re-times the whole main clock to that city.</span></div>
             <div><b>🔔 Group fire</b><span>Alarms sharing a minute ring as one event — snooze or dismiss each one on its own terms.</span></div>
             <div><b>🌀 Spinning mark</b><span>Hover the About logo and the whole emblem rotates in an endless loop.</span></div>
+            <div><b>🏔️ Living horizon</b><span>Click the landscape to cycle hills, mountains, city — or clear it.</span></div>
           </div>
         </section>
         <section>
@@ -512,7 +515,7 @@
             <p>Time sort follows live countdown order. Pick Manual in the Sort box to pin your own order with drag and drop.</p>
           </details>
         </section>
-        <p class="credit">A fun personal project by <b>luigi6890</b> · v1.1.0</p>
+        <p class="credit">A fun personal project by <b>luigi6890</b> · v1.2.0</p>
       </div>
     </div>
   </div>
