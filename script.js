@@ -627,14 +627,20 @@ renderTimer();
 const swDisplay = document.getElementById('swDisplay');
 const swStartBtn = document.getElementById('swStart');
 const swLaps = document.getElementById('swLaps');
+const swSplitLive = document.getElementById('swSplit');
+const swSplitTime = document.getElementById('swSplitTime');
 let swElapsed = 0, swStartAt = 0, swRunning = false, swId = null, lapCount = 0;
+let swLapBase = 0, swSplits = [];
+const SW_SPLIT_TOL = 20;
 function fmtSW(ms) {
   const m = Math.floor(ms/60000), s = Math.floor(ms%60000/1000), cs = Math.floor(ms%1000/10);
   return `${pad(m)}:${pad(s)}.<span class="cs">${pad(cs)}</span>`;
 }
+function swTotal() { return swRunning ? swElapsed + (Date.now() - swStartAt) : swElapsed; }
 function renderSW() {
-  const ms = swRunning ? swElapsed + (Date.now() - swStartAt) : swElapsed;
+  const ms = swTotal();
   swDisplay.innerHTML = fmtSW(ms);
+  swSplitTime.innerHTML = fmtSW(Math.max(0, ms - swLapBase));
   swStartBtn.textContent = swRunning ? 'Pause ' : (swElapsed > 0 ? 'Resume ' : 'Start ');
   const k = document.createElement('kbd'); k.textContent = 'Space'; swStartBtn.appendChild(k);
 }
@@ -643,15 +649,27 @@ function startPauseSW() {
   else { swStartAt = Date.now(); swRunning = true; const loop = () => { renderSW(); if (swRunning) swId = requestAnimationFrame(loop); }; loop(); }
   renderSW();
 }
-function resetSW() { swRunning = false; cancelAnimationFrame(swId); swId = null; swElapsed = 0; lapCount = 0; swLaps.innerHTML = ''; renderSW(); }
+function resetSW() { swRunning = false; cancelAnimationFrame(swId); swId = null; swElapsed = 0; lapCount = 0; swLapBase = 0; swSplits = []; swLaps.innerHTML = ''; swSplitLive.classList.add('hidden'); renderSW(); }
 swStartBtn.addEventListener('click', startPauseSW);
 document.getElementById('swReset').addEventListener('click', resetSW);
 document.getElementById('swLap').addEventListener('click', () => {
   if (!swRunning && swElapsed === 0) return;
+  const total = swTotal();
+  const split = total - swLapBase;
+  let tone = '';
+  if (swSplits.length) {
+    const avg = swSplits.reduce((a, b) => a + b, 0) / swSplits.length;
+    const d = split - avg;
+    if (d <= -SW_SPLIT_TOL) tone = 'faster';
+    else if (d >= SW_SPLIT_TOL) tone = 'slower';
+  }
+  swSplits.push(split);
   lapCount++;
+  swLapBase = total;
   const li = document.createElement('li');
-  li.innerHTML = `<span>Lap ${lapCount}</span><span>${swDisplay.textContent}</span>`;
+  li.innerHTML = `<span class="n">Lap ${lapCount}</span><span class="split ${tone}">${fmtSW(split)}</span><span class="tot">${fmtSW(total)}</span>`;
   swLaps.prepend(li);
+  swSplitLive.classList.remove('hidden');
 });
 renderSW();
 

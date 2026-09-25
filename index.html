@@ -172,6 +172,7 @@
       <div class="feature-panel" id="panel-stopwatch" role="tabpanel" aria-label="Stopwatch">
         <h2>⏱️ Stopwatch</h2>
         <div class="big-display mono" id="swDisplay">00:00.<span class="cs">00</span></div>
+        <div class="split-live hidden" id="swSplit"><span class="lbl">Split</span><span class="val" id="swSplitTime">00:00.<span class="cs">00</span></span></div>
         <div class="btn-row">
           <button class="btn primary" id="swStart">Start <kbd>Space</kbd></button>
           <button class="btn ghost" id="swLap">Lap</button>
@@ -389,7 +390,7 @@
         <div class="banner-text">
           <h2 id="aboutTitle">Aionic Clock</h2>
           <p class="tagline">&ldquo;<span id="taglineText"></span><span class="caret"></span>&rdquo;</p>
-          <span class="ver">v1.2.0</span>
+          <span class="ver">v1.3.0</span>
         </div>
       </div>
       <div class="about-body">
@@ -416,7 +417,7 @@
           <h3 data-collapsible>Key features</h3>
           <div class="feat-grid">
             <div><b>🕒 Dual clock</b><p>Two faces for the same moment.</p><ul><li>Analog + digital clock faces</li><li>12/24H formats with second-synced colons</li><li>Standard, Roman &amp; marker dial styles</li><li>Sweep or ticking second hand</li></ul></div>
-            <div><b>⏳ Timer &amp; ⏱️ Stopwatch</b><p>Measure anything precisely.</p><ul><li>Stacking presets from 10s to 10m</li><li>Lap table with live progress bar</li><li>Centisecond stopwatch readout</li></ul></div>
+            <div><b>⏳ Timer &amp; ⏱️ Stopwatch</b><p>Measure anything precisely.</p><ul><li>Stacking presets from 10s to 10m</li><li>Split times with faster/slower color coding</li><li>Centisecond stopwatch readout</li></ul></div>
             <div><b>⏰ Alarms</b><p>Never miss the moment.</p><ul><li>Labels, repeats, categories &amp; five tones</li><li>Simultaneous alarms ring as one event</li><li>In-row editor, overlap warnings, live countdowns</li><li>Test mode triggers alarm rehearsals</li><li>Floating widget, flashing titles</li><li>Saved locally, box resets after adding</li></ul></div>
             <div><b>🍅 Pomodoro</b><p>Focus in flavorful cycles.</p><ul><li>Focus, short &amp; long phases, depleting ring</li><li>DND by pressing the dial, ⏭ skip rotation</li><li>Tasks with priorities &amp; 🍅 block estimates</li><li>Auto-start options, session dots</li><li>Phase-matched skies, active-task headline</li><li>Configurable minutes &amp; long break intervals</li></ul></div>
             <div><b>🌐 World clock</b><p>Ten zones at a glance.</p><ul><li>Day-phase emoji per local hour</li><li>Drag order; sort by city, country, time</li><li>Click-to-preview on the main dial</li><li>Country, date &amp; GMT offsets</li></ul></div>
@@ -515,7 +516,7 @@
             <p>Time sort follows live countdown order. Pick Manual in the Sort box to pin your own order with drag and drop.</p>
           </details>
         </section>
-        <p class="credit">A fun personal project by <b>luigi6890</b> · v1.2.0</p>
+        <p class="credit">A fun personal project by <b>luigi6890</b> · v1.3.0</p>
       </div>
     </div>
   </div>
