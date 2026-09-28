@@ -170,10 +170,13 @@ buildTicks(widgetTicks);
 
 // Dial styles: arabic / roman / markers — click numerals to cycle
 const DIALS = ['arabic', 'roman', 'markers'];
+// Clockwise from 12: the main face draws all twelve, the compact widget the cardinals.
+const NUMERAL_CLASSES = ['n12', 'n1', 'n2', 'n3', 'n4', 'n5', 'n6', 'n7', 'n8', 'n9', 'n10', 'n11'];
+const CARDINALS = ['n12', 'n3', 'n6', 'n9'];
 const DIAL_VALUES = {
-  arabic: { n12: '12', n3: '3', n6: '6', n9: '9' },
-  roman: { n12: 'XII', n3: 'III', n6: 'VI', n9: 'IX' },
-  markers: { n12: '', n3: '', n6: '', n9: '' },
+  arabic: ['12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'],
+  roman: ['XII', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'],
+  markers: ['', '', '', '', '', '', '', '', '', '', '', ''],
 };
 function setDial(d) {
   prefs.dial = d; savePrefs();
@@ -193,17 +196,13 @@ function numeralSpan(d, cls, val) {
   return s;
 }
 function renderNumerals() {
-  const d = prefs.dial, v = DIAL_VALUES[d];
-  const defs = [
-    { cls: 'n12', val: v.n12 }, { cls: 'n3', val: v.n3 },
-    { cls: 'n6', val: v.n6 }, { cls: 'n9', val: v.n9 },
-  ];
-  // Main face and compact widget face stay in sync (dial style included).
+  const d = prefs.dial, vals = DIAL_VALUES[d];
   numeralsEl.innerHTML = '';
   widgetNumerals.innerHTML = '';
-  defs.forEach(({ cls, val }) => {
-    numeralsEl.appendChild(numeralSpan(d, cls, val));
-    widgetNumerals.appendChild(numeralSpan(d, cls, val));
+  NUMERAL_CLASSES.forEach((cls, i) => {
+    const cardinal = CARDINALS.includes(cls);
+    if (d !== 'markers' || cardinal) numeralsEl.appendChild(numeralSpan(d, cls, vals[i]));
+    if (cardinal) widgetNumerals.appendChild(numeralSpan(d, cls, vals[i]));
   });
 }
 function cycleDial() {
@@ -2205,8 +2204,8 @@ document.addEventListener('keydown', (e) => {
     else setView('clock');
     return;
   }
-  if (key === '?' || key === 'H' || key === 'h') { if (!inField) { toggleHelp(); e.preventDefault(); } return; }
-  if (key === '`') { if (!inField) toggleAbout(); return; }
+  if (key === '?' || key === 'H' || key === 'h') { if (!inField) { toggleAbout(false); toggleHelp(); e.preventDefault(); } return; }
+if (key === '`') { if (!inField) { toggleHelp(false); toggleAbout(); } return; }
   if (inField) return;
   if (key === '~') { toggleAmbPanel(); return; }
 
