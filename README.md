@@ -291,6 +291,17 @@ The project follows [Semantic Versioning](https://semver.org/):
 - **MINOR** — new features (v1.4.0's twelve-numeral dial, v1.5.0's full marker set)
 - **PATCH** — bug fixes (v1.4.1's contrast pass)
 
+### When a version is bumped
+
+**A version is bumped only when the released software changes.** Documentation and
+repository metadata updates do not create a release. If a change only touches
+`README.md` or `CHANGELOG.md`, and describes functionality that already exists, it is
+committed straight to `main` with no tag and no version bump.
+
+This keeps one invariant true at all times: **the newest tag matches the version badge
+in the app.** A commit may sit on `main` ahead of the latest release, and that is
+expected — the release is cut when the software itself moves.
+
 Each release is tagged and published with notes generated from `CHANGELOG.md`, so the
 changelog and the releases page cannot drift apart. If you change user-facing behavior,
 add a section to the changelog under the version you are preparing.

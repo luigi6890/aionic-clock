@@ -2,11 +2,9 @@
 
 All notable changes to Aionic Clock, following [Semantic Versioning](https://semver.org/).
 
-## [1.6.0] - 2026-09-28
-
-### Added
-- README documenting the tools, the full shortcut map, the sky and dial systems, the
-  timing and storage model, the file layout, and the project's versioning policy.
+Only changes to the released software are listed here. Documentation and repository
+metadata updates — such as the README — are committed between releases without a version
+bump.
 
 ## [1.5.0] - 2026-09-28
 
