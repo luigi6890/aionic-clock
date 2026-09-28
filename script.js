@@ -201,7 +201,7 @@ function renderNumerals() {
   widgetNumerals.innerHTML = '';
   NUMERAL_CLASSES.forEach((cls, i) => {
     const cardinal = CARDINALS.includes(cls);
-    if (d !== 'markers' || cardinal) numeralsEl.appendChild(numeralSpan(d, cls, vals[i]));
+    numeralsEl.appendChild(numeralSpan(d, cls, vals[i]));
     if (cardinal) widgetNumerals.appendChild(numeralSpan(d, cls, vals[i]));
   });
 }

@@ -245,6 +245,16 @@ body[data-clock="analog"] .time { display: none; }
 .numeral.n3.tri svg { transform: rotate(-90deg); }  /* right marker points left */
 .numeral.n6.tri svg { transform: rotate(0deg); }    /* bottom marker points up */
 .numeral.n9.tri svg { transform: rotate(90deg); }   /* left marker points right */
+.numeral.n1.tri svg { transform: rotate(210deg); }
+.numeral.n2.tri svg { transform: rotate(240deg); }
+.numeral.n4.tri svg { transform: rotate(-60deg); }
+.numeral.n5.tri svg { transform: rotate(-30deg); }
+.numeral.n7.tri svg { transform: rotate(30deg); }
+.numeral.n8.tri svg { transform: rotate(60deg); }
+.numeral.n10.tri svg { transform: rotate(120deg); }
+.numeral.n11.tri svg { transform: rotate(150deg); }
+.numeral.n1.tri svg, .numeral.n2.tri svg, .numeral.n4.tri svg, .numeral.n5.tri svg,
+.numeral.n7.tri svg, .numeral.n8.tri svg, .numeral.n10.tri svg, .numeral.n11.tri svg { width: 5cqw; height: 5cqw; }
 
 .hand { position: absolute; left: 50%; bottom: 50%; transform-origin: 50% 100%; border-radius: 4px; }
 .hour-hand { width: 2.7cqw; height: 24cqw; margin-left: -1.35cqw; background: var(--hand-hour); z-index: 3; }
@@ -502,7 +512,8 @@ body[data-sky="on"][data-sky-ink="dark"] .mini-del { color: #b91c1c; }
   border-radius: 8px; width: 30px; height: 30px; cursor: pointer; font-size: 0.85rem; flex-shrink: 0;
 }
 .w-row .icon-btn:hover { filter: brightness(1.25); }
-.w-row .w-del { color: #f87171; border-color: rgba(239, 68, 68, 0.4); }
+.w-row .w-del { background: rgba(239, 68, 68, 0.2); color: #f87171; border-color: rgba(239, 68, 68, 0.4); }
+.w-row .w-del:hover { background: rgba(239, 68, 68, 0.35); }
 body[data-theme="light"] .w-row .w-del,
 body[data-sky="on"][data-sky-ink="dark"] .w-row .w-del { color: #b91c1c; }
 .w-row .w-time { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 1rem; font-weight: 700; }
@@ -1271,7 +1282,12 @@ body[data-sky="on"][data-sky-ink="dark"] .about-body summary::before {
 .feat-grid span { font-size: 0.78rem; opacity: 0.7; line-height: 1.4; }
 .feat-grid p { font-size: 0.82rem; opacity: 0.9; margin: 0; }
 .feat-grid ul { padding-left: 1.1rem; margin: 0.15rem 0 0; font-size: 0.76rem; opacity: 0.68; line-height: 1.5; }
-.howto, .philo { padding-left: 1.2rem; font-size: 0.9rem; line-height: 1.7; }
+.philo { padding-left: 1.2rem; font-size: 0.9rem; line-height: 1.7; }
+.howto { list-style: none; padding-left: 0; margin: 0; }
+.howto li { margin-bottom: 0.6rem; }
+.howto li:last-child { margin-bottom: 0; }
+.howto b { display: block; font-size: 0.86rem; margin-bottom: 0.1rem; }
+.howto span { display: block; font-size: 0.83rem; opacity: 0.82; line-height: 1.55; }
 .stack-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.5rem; }
 .stack-row span {
   font-size: 0.78rem; font-weight: 700; padding: 0.3rem 0.75rem; border-radius: 999px;
