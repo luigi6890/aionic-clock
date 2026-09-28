@@ -1054,7 +1054,7 @@ function refreshRingingUI() {
     const sn = document.createElement('button'); sn.className = 'icon-btn'; sn.textContent = '💤';
     sn.title = `Snooze +${mins}m`; sn.setAttribute('aria-label', 'Snooze ' + ringShort(a));
     sn.addEventListener('click', () => snoozeOne(a.id, mins));
-    const di = document.createElement('button'); di.className = 'icon-btn'; di.textContent = '✕';
+    const di = document.createElement('button'); di.className = 'icon-btn w-del'; di.textContent = '✕';
     di.setAttribute('aria-label', 'Dismiss ' + ringShort(a));
     di.addEventListener('click', () => dismissOne(a.id));
     row.append(t, sn, di);
@@ -2205,7 +2205,7 @@ document.addEventListener('keydown', (e) => {
     return;
   }
   if (key === '?' || key === 'H' || key === 'h') { if (!inField) { toggleAbout(false); toggleHelp(); e.preventDefault(); } return; }
-if (key === '`') { if (!inField) { toggleHelp(false); toggleAbout(); } return; }
+  if (key === '`') { if (!inField) { toggleHelp(false); toggleAbout(); } return; }
   if (inField) return;
   if (key === '~') { toggleAmbPanel(); return; }
 
