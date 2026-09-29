@@ -386,13 +386,20 @@ repository metadata updates do not create a release. If a change only touches
 `README.md` or `CHANGELOG.md`, and describes functionality that already exists, it is
 committed straight to `main` with no tag and no version bump.
 
-This keeps one invariant true at all times: **the newest tag matches the version badge
-in the app.** A commit may sit on `main` ahead of the latest release, and that is
-expected — the release is cut when the software itself moves.
+That rule says when a bump is *permitted*, not that every software commit must become a
+release on the spot. Small corrections are free to accumulate on `main` and ship together
+in the next release, so a patch can carry a handful of related fixes rather than being cut
+per commit. Anything sitting on `main` ahead of the newest tag goes under
+`## [Unreleased]` in the changelog, and is folded into the version when the next release is
+cut. That keeps the history complete without inflating the version numbers.
+
+One invariant therefore holds at all times: **the newest tag matches the version badge in
+the app.** It is common for `main` — and the live site deployed from it — to sit ahead of
+the newest release, since a release marks a curated milestone rather than every commit.
 
 Each release is tagged and published with notes generated from `CHANGELOG.md`, so the
 changelog and the releases page cannot drift apart. If you change user-facing behavior,
-add a section to the changelog under the version you are preparing.
+add an entry under `## [Unreleased]`, or under the version you are preparing.
 
 ---
 

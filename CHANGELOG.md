@@ -6,6 +6,13 @@ Only changes to the released software are listed here. Documentation and reposit
 metadata updates — such as the README — are committed between releases without a version
 bump.
 
+## [Unreleased]
+
+### Fixed
+- About: the Tech stack paragraph no longer describes the audio engine as
+  "hand-rolled", which asserted something about how the project was built rather than
+  what it does.
+
 ## [1.5.0] - 2026-09-28
 
 ### Added
