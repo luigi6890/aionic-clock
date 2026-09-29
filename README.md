@@ -381,24 +381,27 @@ The project follows [Semantic Versioning](https://semver.org/):
 
 ### When a version is bumped
 
-Two rules, and that is all:
+The rule:
 
-- **A documentation or repository metadata change** gets no version increment and no
-  release. It is committed straight to `main`.
-- **A software change** is released under the appropriate MAJOR, MINOR, or PATCH
-  increment, however small — and it is not complete until that release exists.
+> A software change is not complete until it has been assigned the appropriate version,
+> recorded in the changelog, and released. Documentation and repository metadata changes do
+> not require a version increment or release.
 
-In practice a software change moves like this:
+A software change therefore moves like this:
 
 ```
-change → commit → version increment + changelog → tag and release → deployed
+change → test it → increment version → update changelog → commit → push → tag and release
 ```
 
-Because the release is part of finishing the work, there is no window in which software
-sits on `main` unreleased. Two things follow from that:
+The code, the version increment, and the changelog entry all land in the **same commit**,
+so one commit is one versioned change and one tag points at exactly one logical change.
+The release is part of finishing the work rather than a later chore, so there is never a
+window in which software sits on `main` unreleased.
 
-- **One logical change is one commit.** A feature that took three commits to build is
-  squashed into one before it is pushed, so it yields one increment rather than three.
+Two habits keep that true:
+
+- **One logical change is one commit.** A feature built across three commits is squashed
+  into one before it is pushed, so it yields one increment rather than three.
 - **Work in progress stays off `main`.** A half-finished change is kept on a branch or
   locally, because any pushed software commit counts as a change awaiting release.
 
