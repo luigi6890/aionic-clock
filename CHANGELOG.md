@@ -3,10 +3,9 @@
 All notable changes to Aionic Clock, following [Semantic Versioning](https://semver.org/).
 
 Only changes to the released software are listed here. Documentation and repository
-metadata updates — such as the README — are committed between releases without a version
-bump.
+metadata updates — such as the README — are committed to `main` without a version bump.
 
-## [Unreleased]
+## [1.5.1] - 2026-09-28
 
 ### Fixed
 - About: the Tech stack paragraph no longer describes the audio engine as
