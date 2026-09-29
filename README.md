@@ -383,13 +383,27 @@ The project follows [Semantic Versioning](https://semver.org/):
 
 Two rules, and that is all:
 
-- **A documentation or repository metadata change** gets no version bump and no release.
-  It is committed straight to `main`.
+- **A documentation or repository metadata change** gets no version increment and no
+  release. It is committed straight to `main`.
 - **A software change** is released under the appropriate MAJOR, MINOR, or PATCH
-  increment, however small.
+  increment, however small — and it is not complete until that release exists.
+
+In practice a software change moves like this:
+
+```
+change → commit → version increment + changelog → tag and release → deployed
+```
+
+Because the release is part of finishing the work, there is no window in which software
+sits on `main` unreleased. Two things follow from that:
+
+- **One logical change is one commit.** A feature that took three commits to build is
+  squashed into one before it is pushed, so it yields one increment rather than three.
+- **Work in progress stays off `main`.** A half-finished change is kept on a branch or
+  locally, because any pushed software commit counts as a change awaiting release.
 
 That keeps one invariant true: **`main`, the live site deployed from it, the version badge
-in the app, and the latest release all describe the same software.** The one expected
+in the app, and the latest release all describe the same software.** The only expected
 exception is a documentation-only commit sitting ahead of the newest tag, because it does
 not change the software.
 
