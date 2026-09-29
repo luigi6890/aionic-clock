@@ -6,6 +6,8 @@ A complete time-keeping workspace in **three files** — no frameworks, no build
 network calls, and no bundled assets. Every sound, sky, and motion is generated live in
 code, and everything you configure is remembered in your browser.
 
+**Try it live: [luigi6890.github.io/aionic-clock](https://luigi6890.github.io/aionic-clock/)**
+
 **Latest release: [v1.5.0](https://github.com/luigi6890/aionic-clock/releases/tag/v1.5.0)** ·
 Full history in [CHANGELOG.md](CHANGELOG.md)
 
@@ -28,15 +30,14 @@ Full history in [CHANGELOG.md](CHANGELOG.md)
 
 ## Quick start
 
-It is a static site, so there is nothing to install.
+**Use it online** — no install, nothing to download:
 
-**Just open it**
+**https://luigi6890.github.io/aionic-clock/**
 
-```
-index.html
-```
+**Or run it yourself.** It is a static site, so there is nothing to build.
 
-Double-click the file, or drag it into a browser. That is the whole setup.
+Open `index.html` directly — double-click it, or drag it into a browser. That is the whole
+setup.
 
 **Or serve it locally** (optional, useful if your browser restricts `file://`)
 
@@ -56,14 +57,17 @@ configure.
 | Area | What it does |
 | --- | --- |
 | **Clock** | Analog and digital faces, 12/24H, three dial styles, sweep or ticking seconds |
-| **Timer** | Countdown with stacking presets, a green finish state |
+| **Timer** | Countdown with stacking presets, a progress bar, and a green finish state |
 | **Stopwatch** | Centisecond readout, live split timer, lap table graded by pace |
-| **Alarms** | Groups that ring as one event, in-row editor, test mode, floating widget |
-| **Pomodoro** | Focus cycles with tasks, priorities, and Do Not Disturb |
+| **Alarms** | Groups that ring as one event, in-row editor, test mode, live countdowns |
+| **Pomodoro** | Focus cycles with tasks, priorities, auto-start, and Do Not Disturb |
 | **World clock** | Ten cities with DST-correct offsets and click-to-preview |
 | **Ambience** | Eight procedurally synthesized soundscapes with a live visualizer |
+| **Compact widget** | A mini clock docked top-right in every view, and the ringing-alarm control surface |
 | **Sky** | A 24-hour gradient cycle with stars, haze, grain, and a clickable horizon |
 | **Wall mode** | Fullscreen screensaver clock with auto-hiding chrome |
+| **About** | The guide: overview, name and inspiration, key features, how to use, FAQ |
+| **Help** | The full keyboard shortcut map, always one keypress away |
 
 State is persisted in `localStorage`, so your alarms, tasks, themes, and mixes survive a
 refresh or a return visit. Nothing is ever uploaded — there is no account and no server.
@@ -71,6 +75,37 @@ refresh or a return visit. Nothing is ever uploaded — there is no account and 
 ---
 
 ## The tools
+
+### 🕒 Clock
+
+The default view, and the one that stays visible everywhere else. It has two faces and a
+set of hidden niceties:
+
+- **Analog and digital** are one toggle (<kbd>M</kbd>). The analog face draws all twelve
+  hour positions; hovering it reveals a digital readout, and the center dot flips the
+  second hand between sweep and tick.
+- **Three dial styles** — Standard, Roman, and Markers — cycled with <kbd>D</kbd> or by
+  clicking any numeral directly.
+- **12H and 24H** (<kbd>F</kbd>), with an AM/PM badge that fits without reflowing the
+  digits, and a second-synced colon that only blinks on whole-second boundaries.
+- The **date** sits under the title, and a **primary-zone badge** appears whenever a
+  world-clock city is driving the display.
+
+### ⏳ Timer
+
+A plain countdown for one job, with two ways to set it:
+
+- **Type it** into the Hours / Minutes / Seconds boxes, or tap a **preset** — 10s, 30s,
+  1m, 5m, or 10m.
+- **Presets stack.** Tap 10s three times and you get 30 seconds; tap 5m after that and
+  you get 5:30. A preset adds to the current total instead of replacing it, and the status
+  line spells out the new total so nothing is silently dropped.
+- <kbd>Space</kbd> starts and pauses, <kbd>R</kbd> resets (clearing the boxes too). A
+  progress bar fills as the countdown runs.
+- **At zero** it beeps, the status reads "⏰ Time is up!", and the display turns green
+  until you reset.
+- If a duration is already set, Start resumes it; the H/M/S boxes are only read on a
+  fresh start.
 
 ### ⏱️ Stopwatch
 
@@ -88,39 +123,78 @@ once you record the first lap, and every lap adds a row to the table below:
 
 ### ⏰ Alarms
 
-Click any row to expand its editor and change the time, label, repeat days, category, or
-sound. Notable behavior:
+Pick a time, optionally add a label, and press **Add**. The box clears itself afterwards
+so nothing you are typing gets silently dropped. Click any row to expand its editor.
 
+- **Repeat options** are Once, Every day, Weekdays, Weekends, or Custom days; **five
+  tones** are available, and each alarm gets a category — Personal, Work, Focus, Reminder,
+  or Important — shown as a colored dot.
 - **Grouped ringing.** Alarms sharing the same minute fire as *one* event and speak with
-  the first alarm's voice, but you snooze or dismiss each individually.
+  the first alarm's voice, but you snooze or dismiss each individually. Snooze lengths
+  are +5, +10, +15, or +30 minutes.
 - **Test mode** rehearses the real code path — the same group selection, the same
   sounds — without touching your schedule.
-- **Overlap warnings** flag a new alarm that collides with one you already have.
-- **Reordering** by drag, or by sorting on time, city, country, or manual position.
-- **The floating widget** keeps the time visible in every view and becomes the control
-  surface while something is ringing.
+- **Overlap warnings** flag a new alarm that collides with one you already have, and a
+  **live countdown** chip can be switched on to watch the next ring approach.
+- **Sorting** by Manual, Time, or Label; drag to reorder in Manual.
+- The **floating widget** docks top-right in every view and becomes the control surface
+  while something is ringing.
 
 ### 🍅 Pomodoro
 
-Focus, Short, and Long phases (25/5/15 by default, four sessions per cycle) with a
-depleting ring and session dots. Pressing the dial toggles **Do Not Disturb**; the skip
-button steps to whatever the cycle order dictates next. Tasks carry a priority and a
-tomato-block estimate, and the active one becomes the panel headline. Each phase gets
-its own sky palette, with rolling waves while working and rising bubbles on breaks.
+Focus, Short, and Long phases — 25/5/15 minutes by default over a four-session cycle —
+with a depleting ring and session dots for the cycle.
+
+- **Phase buttons** switch phases manually, and the header tracks "Session 1/4".
+- <kbd>Space</kbd> starts and pauses, <kbd>R</kbd> resets, and the skip button ⏭ steps
+  forward in *true cycle order* rather than simply advancing one step.
+- **Do Not Disturb** toggles by pressing the dial or the DND button, which strips the
+  page back to the countdown and essential controls only.
+- **Configurable**: work (1–180m), short (1–60m), and long (1–90m) lengths, sessions per
+  cycle (1–12), plus auto-breaks and auto-work so the chain runs hands-free.
+- **Tasks** carry a priority — High, Med, or Low — and a tomato-block estimate (1–99).
+  Click one to make it active and it becomes the panel headline. Filter by All, Active,
+  or Done, filter by priority, and optionally sort finished tasks to the bottom.
+- **Phase palettes**: see [Look and feel](#look-and-feel) for the skies and motion each
+  phase brings.
 
 ### 🌐 World clock
 
 Ten zones — UTC, New York, Los Angeles, London, Paris, Dubai, Singapore, Mumbai, Tokyo,
-and Sydney — each with a day-phase emoji, local date, and GMT offset. Clicking a zone
-re-times the entire main clock to that city; click the badge to return home.
+and Sydney — each with a day-phase emoji, the local date, and a GMT offset.
+
+- **Sort** by Manual, City, Country, or Time. Time sort follows live countdown order, so
+  pin **Manual** if you want your own arrangement.
+- **Toggles** for GMT offsets, 12H/24H, and seconds.
+- **Drag to reorder** is enabled in Manual sort.
+- **Click a zone** to make it primary: the whole main clock re-times to that city and a
+  badge appears so you can click back home.
 
 ### 🎧 Ambience
 
 Eight soundscapes synthesized with the Web Audio API — Stormfall, Dawn Chorus, Falling
 Leaves, Babbling Brook, Pond Chorus, Bamboo Fountain, Night Field, and Hearthside. Each
-is built from independent oscillator and noise layers, so you can mix them freely, let
-the auto-DJ rotate a fresh track every minute or so, or play everything at once while
-watching the live spectrum visualizer.
+is built from independent oscillator and noise layers.
+
+- **Play or stop any track** independently and layer several at once.
+- **🔀 auto-DJ** keeps the mix restless, rotating a fresh track every 40–80 seconds.
+- **All** starts every soundscape together, staggered so they blend instead of stacking.
+- A **volume slider** (with a live readout) governs the whole panel, and a **live
+  color-coded spectrum visualizer** runs above the list.
+- The panel opens with the dock's Ambience button or <kbd>~</kbd>. No audio files are
+  loaded — the note under the list says so.
+
+### 🔍 Compact widget
+
+Whenever a tool other than the clock is open, a mini version of the clock docks in the
+top-right corner so the time is never lost.
+
+- It **follows the clock mode** — analog or digital, dial style included — and keeps only
+  the four cardinals on its tiny dial so they stay legible.
+- The **AM/PM badge** appears in the same corner without resizing the widget.
+- While an alarm is ringing it **becomes the alarm panel**, with per-alarm snooze, a
+  snooze-length picker, and a dismiss-all button.
+- Hovering it **reveals the volume level**.
 
 ---
 
@@ -200,6 +274,12 @@ The four cardinals are emphasized and the eight minor markers are set smaller; i
 style they become inward-pointing triangles. The compact top-right widget keeps only the
 cardinals so it stays legible at that size.
 
+**Pomodoro phase themes.** With the Sky on, opening Pomodoro hands the palette over to
+the current phase instead of the time of day: a calm teal-green for **Focus**, a bright
+sky-blue for a **Short** break, and a soft violet for a **Long** break. Each phase also
+brings its own motion — layered **rolling waves** while you focus, and **rising bubbles**
+on breaks. With the Sky off, none of this applies and the normal theme is used.
+
 ---
 
 ## How it works
@@ -258,7 +338,7 @@ aionic-clock/
 └── README.md
 ```
 
-About 4,200 lines of hand-written code. The long single-file layout is deliberate: it
+About 4,200 lines of code. The long single-file layout is deliberate: it
 keeps the project dependency-free and trivial to read end to end, and every feature is
 organized under a banner comment in `script.js`.
 
@@ -274,12 +354,20 @@ custom properties, container queries, `Intl.DateTimeFormat`, the Web Audio API, 
 `localStorage`. Because the whole app is plain ES2020+ with no transpilation, older
 browsers are not supported.
 
-Two behaviors are worth knowing:
+Three behaviors are worth knowing:
 
-- **Sky locks the theme to dark.** While the sky is on, light/dark is held at dark so the
-  gradient stays readable; turning the sky off restores your previous choice.
-- **Alarms need the tab awake.** Browsers may throttle timers in background tabs. Keep
-  the tab visible if you depend on a firing alarm while working elsewhere.
+- **Sky takes over the theme — but not the way it looks.** While the Sky is on, the
+  light/dark *setting* is pinned to dark and the toggle is disabled, because the sky now
+  owns contrast; your previous choice is restored the moment you switch the Sky off. The
+  *rendering* then follows the sky's luminance instead, so the app looks **light with dark
+  text on a bright daytime sky** and **dark with light text at night**. The pinned setting
+  and the visible result are two different things.
+- **Alarms survive background tabs.** Due alarms are matched against the wall-clock
+  `HH:MM`, not against accumulated ticks, so a throttled or delayed loop still fires the
+  right alarm — it may ring a little late, but it will not ring for the wrong time. Keep
+  the tab open for it to ring at all; a discarded tab only catches up when restored.
+- **Audio needs one click first.** Browsers block sound until you interact with the page,
+  so press a key or click once before relying on an alarm or the ambience mixer.
 
 ---
 
@@ -287,9 +375,9 @@ Two behaviors are worth knowing:
 
 The project follows [Semantic Versioning](https://semver.org/):
 
-- **MAJOR** — breaking changes
-- **MINOR** — new features (v1.4.0's twelve-numeral dial, v1.5.0's full marker set)
-- **PATCH** — bug fixes (v1.4.1's contrast pass)
+- **MAJOR** — incompatible changes to established behavior or interfaces
+- **MINOR** — new backward-compatible features and substantial improvements
+- **PATCH** — backward-compatible bug fixes and small corrections
 
 ### When a version is bumped
 
