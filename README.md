@@ -381,25 +381,21 @@ The project follows [Semantic Versioning](https://semver.org/):
 
 ### When a version is bumped
 
-**A version is bumped only when the released software changes.** Documentation and
-repository metadata updates do not create a release. If a change only touches
-`README.md` or `CHANGELOG.md`, and describes functionality that already exists, it is
-committed straight to `main` with no tag and no version bump.
+Two rules, and that is all:
 
-That rule says when a bump is *permitted*, not that every software commit must become a
-release on the spot. Small corrections are free to accumulate on `main` and ship together
-in the next release, so a patch can carry a handful of related fixes rather than being cut
-per commit. Anything sitting on `main` ahead of the newest tag goes under
-`## [Unreleased]` in the changelog, and is folded into the version when the next release is
-cut. That keeps the history complete without inflating the version numbers.
+- **A documentation or repository metadata change** gets no version bump and no release.
+  It is committed straight to `main`.
+- **A software change** is released under the appropriate MAJOR, MINOR, or PATCH
+  increment, however small.
 
-One invariant therefore holds at all times: **the newest tag matches the version badge in
-the app.** It is common for `main` — and the live site deployed from it — to sit ahead of
-the newest release, since a release marks a curated milestone rather than every commit.
+That keeps one invariant true: **`main`, the live site deployed from it, the version badge
+in the app, and the latest release all describe the same software.** The one expected
+exception is a documentation-only commit sitting ahead of the newest tag, because it does
+not change the software.
 
 Each release is tagged and published with notes generated from `CHANGELOG.md`, so the
 changelog and the releases page cannot drift apart. If you change user-facing behavior,
-add an entry under `## [Unreleased]`, or under the version you are preparing.
+add an entry to the changelog under the version you are releasing.
 
 ---
 
