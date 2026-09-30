@@ -5,6 +5,25 @@ All notable changes to Aionic Clock, following [Semantic Versioning](https://sem
 Only changes to the released software are listed here. Documentation and repository
 metadata updates — such as the README — are committed to `main` without a version bump.
 
+## [1.5.2] - 2026-09-29
+
+### Fixed
+- Wall mode now closes the Ambience panel on entry, so the dock cannot sit over the
+  enlarged clock. Ambience is still reachable afterwards. The world clock needs no
+  change, since it collapses into a horizontal row at the bottom.
+- Dropdowns no longer turn gray under white text in Dark + Glass or with the Sky on.
+  The native widget background was bleeding through the translucent input color, so
+  selects now declare a color scheme that follows the theme, like the time pickers.
+- The finished timer uses the deep green under the Light theme as well, not just the
+  daytime Sky, so the finish state reads clearly on a white card.
+- Hover glows on the toolbar, world clock, Ambience, its play buttons, and the About
+  and Help buttons turn deep blue in the Light theme and under the daytime Sky, where
+  the cyan glow disappeared against light surfaces.
+
+### Added
+- Pomodoro's Clear all asks for confirmation and reports the number of tasks, matching
+  the alarm delete, so a stray click cannot wipe the list.
+
 ## [1.5.1] - 2026-09-28
 
 ### Fixed

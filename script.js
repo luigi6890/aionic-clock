@@ -494,7 +494,7 @@ function setWall(on) {
   if (on === isOn) return;
   if (on) {
     wallPrevView = document.body.dataset.view || 'clock';
-    toggleAbout(false); toggleHelp(false); // modals stay out of the screensaver
+    toggleAbout(false); toggleHelp(false); toggleAmbPanel(false); // overlays stay out of the screensaver
     document.body.dataset.wall = 'on';
     document.body.dataset.view = 'clock';
     navBtns.forEach(b => b.classList.toggle('active', b.dataset.goto === 'clock'));
@@ -1650,6 +1650,9 @@ document.getElementById('taskClearDone').addEventListener('click', () => {
   taskStatus.textContent = 'Finished tasks cleared.';
 });
 document.getElementById('taskClearAll').addEventListener('click', () => {
+  if (!tasks.length) return;
+  const n = tasks.length;
+  if (!confirm(`Delete all ${n} task${n === 1 ? '' : 's'}? This cannot be undone.`)) return;
   tasks = []; saveTasks(); renderTasks();
   taskStatus.textContent = 'All tasks cleared.';
 });

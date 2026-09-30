@@ -367,6 +367,7 @@ body[data-view="clock"] .stage { display: none; }
 .big-display { font-size: 3.2rem; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: 0.05em; margin: 0.5rem 0 1rem; }
 .big-display.mono .cs { font-size: 1.8rem; opacity: 0.7; }
 .big-display.finished { color: #4ade80; animation: pulse 0.8s ease infinite alternate; }
+body[data-theme="light"] .big-display.finished,
 body[data-sky="on"][data-sky-ink="dark"] .big-display.finished { color: #15803d; }
 @keyframes pulse { from { transform: scale(1);} to { transform: scale(1.05);} }
 
@@ -429,6 +430,9 @@ body[data-sky="on"][data-sky-ink="dark"] .laps .slower { color: #b91c1c; }
   background: var(--input-bg); color: var(--text); border: 1px solid var(--card-border);
   border-radius: 10px; padding: 0.5rem 0.4rem; font-size: 0.9rem; font-weight: 700; cursor: pointer;
 }
+select { color-scheme: dark; }
+body[data-theme="light"] select,
+body[data-sky="on"][data-sky-ink="dark"] select { color-scheme: light; }
 .alarm-days { display: flex; gap: 0.35rem; justify-content: center; flex-wrap: wrap; margin-bottom: 0.8rem; }
 .alarm-days.hidden { display: none; }
 .alarm-tools { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.6rem; }
@@ -559,6 +563,11 @@ body[data-view="alarm"] .alarm-widget { display: none; } /* panel banner takes o
   border-color: #22d3ee;
   box-shadow: 0 0 16px rgba(34, 211, 238, 0.45);
   animation: btnFlash 0.6s ease;
+}
+body[data-theme="light"] :is(.help-btn, .info-btn, .tool-btn, .zone-toggle, .amb-btn, .amb-play):hover,
+body[data-sky="on"][data-sky-ink="dark"] :is(.help-btn, .info-btn, .tool-btn, .zone-toggle, .amb-btn, .amb-play):hover {
+  border-color: #6366f1;
+  box-shadow: 0 0 18px rgba(99, 102, 241, 0.45);
 }
 /* Long bars glow without wiggling */
 .zone-toggle:hover, .amb-btn:hover { animation: btnGlow 0.6s ease; }
