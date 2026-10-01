@@ -178,6 +178,7 @@
           <button class="btn ghost" id="swLap">Lap</button>
           <button class="btn danger" id="swReset">Reset <kbd>R</kbd></button>
         </div>
+        <p class="status" id="swStatus">Press Start to run the stopwatch.</p>
         <ol class="laps" id="swLaps"></ol>
       </div>
 
@@ -336,7 +337,7 @@
       <button id="ambClose" aria-label="Close panel">✕</button>
     </div>
     <canvas id="ambViz" width="268" height="54"></canvas>
-    <div class="amb-vol"><span>🔊</span><input type="range" id="ambVol" min="0" max="100" value="70" aria-label="Volume" /><span class="amb-vol-val" id="ambVolVal">70</span></div>
+    <div class="amb-vol"><button class="amb-vol-icon" id="ambVolIcon" type="button" aria-pressed="false" aria-label="Mute ambience" title="Mute / unmute — keeps your level">🔊</button><input type="range" id="ambVol" min="0" max="100" value="70" aria-label="Volume" /><span class="amb-vol-val" id="ambVolVal">70</span></div>
     <ul class="amb-list" id="ambList"></ul>
     <p class="amb-note">Procedural audio · no files</p>
   </div>
@@ -390,7 +391,7 @@
         <div class="banner-text">
           <h2 id="aboutTitle">Aionic Clock</h2>
           <p class="tagline">&ldquo;<span id="taglineText"></span><span class="caret"></span>&rdquo;</p>
-          <span class="ver">v1.5.2</span>
+          <span class="ver">v1.6.0</span>
         </div>
       </div>
       <div class="about-body">
@@ -453,6 +454,7 @@
             <div><b>⏭ Skip stepping</b><span>Skip on a running Pomodoro jumps to whatever phase the cycle order dictates next.</span></div>
             <div><b>🔀 Restless DJ</b><span>Ambience shuffle never sits still — it rotates a fresh track in every minute or so.</span></div>
             <div><b>⚡ Colon lockstep</b><span>The blinking colons are phase-locked to whole seconds, not just animated.</span></div>
+            <div><b>👁 Colon tap</b><span>Click the blinking colons to re-sync them to the second if they ever drift.</span></div>
             <div><b>🌍 One-click time travel</b><span>Clicking a world zone re-times the whole main clock to that city.</span></div>
             <div><b>🔔 Group fire</b><span>Alarms sharing a minute ring as one event — snooze or dismiss each one on its own terms.</span></div>
             <div><b>🌀 Spinning mark</b><span>Hover the About logo and the whole emblem rotates in an endless loop.</span></div>
@@ -518,7 +520,7 @@
             <p>Time sort follows live countdown order. Pick Manual in the Sort box to pin your own order with drag and drop.</p>
           </details>
         </section>
-        <p class="credit">A fun personal project by <b>luigi6890</b> · v1.5.2</p>
+        <p class="credit">A fun personal project by <b>luigi6890</b> · v1.6.0</p>
       </div>
     </div>
   </div>

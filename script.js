@@ -154,6 +154,8 @@ function resyncColons() {
   colonSyncTimer = setTimeout(() => colons.forEach(c => { c.style.animation = ''; c.style.opacity = ''; }), wait);
 }
 clockModeBtn.addEventListener('click', () => { setClockMode(document.body.dataset.clock === 'analog' ? 'digital' : 'analog'); clockModeBtn.blur(); });
+// A rare drift can leave the blink a beat off the seconds; a click re-aligns it.
+document.addEventListener('click', (e) => { if (e.target.closest('.colon')) resyncColons(); });
 
 // Ticks: 60 minimal flat markers (main face + compact widget face)
 function buildTicks(ring) {
@@ -626,6 +628,7 @@ renderTimer();
 const swDisplay = document.getElementById('swDisplay');
 const swStartBtn = document.getElementById('swStart');
 const swLaps = document.getElementById('swLaps');
+const swStatus = document.getElementById('swStatus');
 const swSplitLive = document.getElementById('swSplit');
 const swSplitTime = document.getElementById('swSplitTime');
 let swElapsed = 0, swStartAt = 0, swRunning = false, swId = null, lapCount = 0;
@@ -644,11 +647,11 @@ function renderSW() {
   const k = document.createElement('kbd'); k.textContent = 'Space'; swStartBtn.appendChild(k);
 }
 function startPauseSW() {
-  if (swRunning) { swElapsed += Date.now() - swStartAt; swRunning = false; cancelAnimationFrame(swId); swId = null; }
-  else { swStartAt = Date.now(); swRunning = true; const loop = () => { renderSW(); if (swRunning) swId = requestAnimationFrame(loop); }; loop(); }
+  if (swRunning) { swElapsed += Date.now() - swStartAt; swRunning = false; cancelAnimationFrame(swId); swId = null; swStatus.textContent = 'Paused.'; }
+  else { swStartAt = Date.now(); swRunning = true; swStatus.textContent = 'Running...'; const loop = () => { renderSW(); if (swRunning) swId = requestAnimationFrame(loop); }; loop(); }
   renderSW();
 }
-function resetSW() { swRunning = false; cancelAnimationFrame(swId); swId = null; swElapsed = 0; lapCount = 0; swLapBase = 0; swSplits = []; swLaps.innerHTML = ''; swSplitLive.classList.add('hidden'); renderSW(); }
+function resetSW() { swRunning = false; cancelAnimationFrame(swId); swId = null; swElapsed = 0; lapCount = 0; swLapBase = 0; swSplits = []; swLaps.innerHTML = ''; swSplitLive.classList.add('hidden'); swStatus.textContent = 'Press Start to run the stopwatch.'; renderSW(); }
 swStartBtn.addEventListener('click', startPauseSW);
 document.getElementById('swReset').addEventListener('click', resetSW);
 document.getElementById('swLap').addEventListener('click', () => {
@@ -669,6 +672,7 @@ document.getElementById('swLap').addEventListener('click', () => {
   li.innerHTML = `<span class="n">Lap ${lapCount}</span><span class="split ${tone}">${fmtSW(split)}</span><span class="tot">${fmtSW(total)}</span>`;
   swLaps.prepend(li);
   swSplitLive.classList.remove('hidden');
+  swStatus.textContent = lapCount === 1 ? 'First lap recorded.' : `Lap ${lapCount} recorded.`;
 });
 renderSW();
 
@@ -1996,6 +2000,8 @@ const ambPanel = document.getElementById('ambPanel');
 const ambList = document.getElementById('ambList');
 const ambVol = document.getElementById('ambVol');
 const ambVolVal = document.getElementById('ambVolVal');
+const ambVolIcon = document.getElementById('ambVolIcon');
+let ambMuted = false;
 const NOTE_SVG = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l10-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>';
 const ambViz = document.getElementById('ambViz');
 const ambVctx = ambViz.getContext('2d');
@@ -2093,9 +2099,22 @@ document.getElementById('ambAll').addEventListener('click', () => {
 function syncAmbVol() {
   ambVolVal.textContent = ambVol.value;
 }
+function applyAmbGain() {
+  if (!ambMaster) return;
+  ambMaster.gain.setTargetAtTime(ambMuted ? 0 : prefs.ambVol / 100, ambCtx.currentTime, 0.05);
+}
+function toggleAmbMute() {
+  ambMuted = !ambMuted;
+  ambVolIcon.textContent = ambMuted ? '🔇' : '🔊';
+  ambVolIcon.classList.toggle('muted', ambMuted);
+  ambVolIcon.setAttribute('aria-pressed', String(ambMuted));
+  ambVolIcon.setAttribute('aria-label', ambMuted ? 'Unmute ambience' : 'Mute ambience');
+  applyAmbGain();
+}
+ambVolIcon.addEventListener('click', toggleAmbMute);
 ambVol.addEventListener('input', () => {
   prefs.ambVol = +ambVol.value; savePrefs(); syncAmbVol();
-  if (ambMaster) ambMaster.gain.setTargetAtTime(prefs.ambVol / 100, ambCtx.currentTime, 0.05);
+  applyAmbGain();
 });
 function drawViz() {
   vizRaf = null;

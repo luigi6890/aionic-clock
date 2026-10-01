@@ -5,6 +5,23 @@ All notable changes to Aionic Clock, following [Semantic Versioning](https://sem
 Only changes to the released software are listed here. Documentation and repository
 metadata updates — such as the README — are committed to `main` without a version bump.
 
+## [1.6.0] - 2026-10-01
+
+### Added
+- Stopwatch status line under the controls, matching the Timer's: it reports the
+  running and paused states and confirms each recorded lap.
+- Ambience: the volume icon is now a button that mutes and unmutes without
+  changing your level, so the slider keeps its setting while sound is silenced.
+- The blinking colons can be clicked to re-sync them to the second, for the rare
+  occasions when they drift. Added as an Easter egg card.
+
+### Fixed
+- Dropdowns no longer paint gray under white text in Dark + Glass or with the Sky
+  on. The native widget background was bleeding through the translucent input
+  color, so selects now declare a color scheme that follows the theme, like the
+  time pickers. They keep the palette's own input color, so daytime Sky and the
+  Light themes stay white while the dark contexts stay translucent.
+
 ## [1.5.2] - 2026-09-29
 
 ### Fixed
