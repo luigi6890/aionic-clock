@@ -391,18 +391,21 @@
         <div class="banner-text">
           <h2 id="aboutTitle">Aionic Clock</h2>
           <p class="tagline">&ldquo;<span id="taglineText"></span><span class="caret"></span>&rdquo;</p>
-          <span class="ver">v1.6.0</span>
+          <span class="ver">v1.6.1</span>
         </div>
       </div>
       <div class="about-body">
         <section>
           <h3>Overview</h3>
-          <p>Aionic Clock is an all-in-one time kit: a comprehensive interactive digital and analog clock fused with a timer,
-            stopwatch, alarms, Pomodoro focus sessions with tasks, a world clock, various background themes and palettes, a fullscreen
-            wall mode, and procedural ambient soundscapes.</p>
-          <p>It solves tab-switching fatigue — instead of juggling a clock app, a timer app, a focus app, and a
-            soundscape app, one calm page covers timing, productivity, and atmosphere. Use it as a desk clock, a study
-            companion, a meeting timer, or a screensaver.</p>
+          <p>Aionic Clock is a single-page time kit that keeps every clock you reach for in one place: a
+            digital and analog face with three dial styles, a countdown timer whose presets stack, a
+            centisecond stopwatch with split times, alarms that ring together as one event, Pomodoro sessions
+            with tasks, a ten-city world clock, eight procedural soundscapes, and a fullscreen wall mode for
+            when the screen is the only thing left on the desk.</p>
+          <p>Everything you see and hear is generated in code — the soundscapes, the sky, the motion — with no
+            frameworks, no audio files, and no network calls, so it opens instantly and works offline. Alarms,
+            tasks, themes, and mixes are remembered in your browser. Reach for it as a desk clock, a study
+            companion, a meeting timer, a focus timer, or a screensaver.</p>
           <p class="muted">Built for anyone who likes their time beautifully kept.</p>
         </section>
         <section>
@@ -422,12 +425,12 @@
             <div><b>⏳ Timer &amp; ⏱️ Stopwatch</b><p>Measure anything precisely.</p><ul><li>Stacking presets from 10s to 10m</li><li>Centisecond stopwatch readout</li><li>Live split timer under the readout</li><li>Lap table with splits graded green or red</li><li>Paused time never counts toward a lap</li><li>Countdown finishes in green</li></ul></div>
             <div><b>⏰ Alarms</b><p>Never miss the moment.</p><ul><li>Labels, repeats, categories &amp; five tones</li><li>Simultaneous alarms ring as one event</li><li>In-row editor, overlap warnings, live countdowns</li><li>Test mode triggers alarm rehearsals</li><li>Floating widget, flashing titles</li><li>Saved locally, box resets after adding</li></ul></div>
             <div><b>🍅 Pomodoro</b><p>Focus in flavorful cycles.</p><ul><li>Focus, short &amp; long phases, depleting ring</li><li>DND by pressing the dial, ⏭ skip rotation</li><li>Tasks with priorities &amp; 🍅 block estimates</li><li>Auto-start options, session dots</li><li>Phase-matched skies, active-task headline</li><li>Configurable minutes &amp; long break intervals</li></ul></div>
-            <div><b>🌐 World clock</b><p>Ten zones at a glance.</p><ul><li>Day-phase emoji per local hour</li><li>Drag order; sort by city, country, time</li><li>Click-to-preview on the main dial</li><li>Country, date &amp; GMT offsets</li></ul></div>
-            <div><b>🌌 Living sky</b><p>Weather for your wallpaper.</p><ul><li>24-hour gradient cycle: stars at night, haze and grain by day</li><li>Drifting color blobs tinted to the hour</li><li>Clickable horizon silhouettes: hills, mountains, city</li><li>Landscapes cross-fade and re-tint with the sky</li><li>Light &amp; dark themes, glass or solid cards</li><li>Per-phase focus palettes: rolling waves, rising bubbles</li></ul></div>
-            <div><b>⛶ Wall mode</b><p>Turn any screen into a clock.</p><ul><li>Fullscreen with auto-hiding chrome</li><li>Contracting analog face, solid-ink digits</li><li>In-face date pill on analog</li></ul></div>
-            <div><b>🎧 Ambience</b><p>Eight rooms of procedural sound.</p><ul><li>Storm, dawn, leaves, brook, frogs, bamboo, night, fire</li><li>Layer mixer, auto-DJ rotation, Play All</li><li>Live color-coded visualizer</li></ul></div>
-            <div><b>⌨️ Keyboard-first</b><p>Mouse optional.</p><ul><li>Full shortcut map under <kbd>?</kbd>/<kbd>H</kbd></li><li>Display keys stay silent in wall mode</li></ul></div>
             <div><b>🔍 Compact widget</b><p>Time stays visible everywhere.</p><ul><li>Mini clock parks top-right in every tool</li><li>Follows analog and digital modes</li><li>AM/PM badge fits without resizing</li><li>Cardinals only on the tiny dial</li><li>Ringing alarms dock here with snooze &amp; dismiss</li></ul></div>
+            <div><b>🌌 Living sky</b><p>Weather for your wallpaper.</p><ul><li>24-hour gradient cycle: stars at night, haze and grain by day</li><li>Drifting color blobs tinted to the hour</li><li>Clickable horizon silhouettes: hills, mountains, city, re-tinting with the sky</li><li>Light &amp; dark themes, glass or solid cards</li><li>Per-phase focus palettes: rolling waves, rising bubbles</li></ul></div>
+            <div><b>🌐 World clock</b><p>Ten zones at a glance.</p><ul><li>Day-phase emoji per local hour</li><li>Drag order; sort by city, country, time</li><li>Click-to-preview on the main dial</li><li>Country, date &amp; GMT offsets</li></ul></div>
+            <div><b>🎧 Ambience</b><p>Eight rooms of procedural sound.</p><ul><li>Storm, dawn, leaves, brook, frogs, bamboo, night, fire</li><li>Layer mixer, auto-DJ rotation, Play All</li><li>Live color-coded visualizer</li></ul></div>
+            <div><b>⛶ Wall mode</b><p>Turn any screen into a clock.</p><ul><li>Fullscreen with auto-hiding chrome</li><li>Contracting analog face, solid-ink digits</li><li>In-face date pill on analog</li></ul></div>
+            <div><b>⌨️ Keyboard-first</b><p>Mouse optional.</p><ul><li>Full shortcut map under <kbd>?</kbd>/<kbd>H</kbd></li><li>Display keys stay silent in wall mode</li></ul></div>
           </div>
         </section>
         <section>
@@ -516,11 +519,17 @@
             <p>Hit Test on any alarm row — it rehearses the full ringing experience, pulling in same-time alarms scheduled today, without touching the schedule.</p>
           </details>
           <details>
-            <summary>Why does my world-clock order keep changing?</summary>
-            <p>Time sort follows live countdown order. Pick Manual in the Sort box to pin your own order with drag and drop.</p>
+            <summary>Why does the animation stutter or drop frames?</summary>
+            <p>Only the drawing is late — no input lag, nothing stalls. With the Sky on the background animates
+              constantly, so whenever a card appears over it the glass has to re-blur, and that is the costly
+              moment. Pomodoro with the Sky is the heaviest case, since a phase switch repaints the sky and starts
+              the waves or bubbles. It settles as soon as the transition finishes. To calm it down, press
+              <kbd>3</kbd> to switch the Sky off, or <kbd>W</kbd> and <kbd>~</kbd> to close the World clock and
+              Ambience panels; <kbd>2</kbd> for Solid cards helps too, though the card style matters far less than
+              the Sky does.</p>
           </details>
         </section>
-        <p class="credit">A fun personal project by <b>luigi6890</b> · v1.6.0</p>
+        <p class="credit">A fun personal project by <b>luigi6890</b> · v1.6.1</p>
       </div>
     </div>
   </div>

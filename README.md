@@ -387,6 +387,15 @@ The rule:
 > recorded in the changelog, and released. Documentation and repository metadata changes do
 > not require a version increment or release.
 
+Concretely, by file:
+
+- **A change to `index.html`, `style.css`, or `script.js`** is a software change, released
+  under the appropriate MAJOR, MINOR, or PATCH increment, however small. This includes the
+  About and Help modals: their copy and layout ship inside the app, so editing them counts
+  as changing the software, not as documentation.
+- **A change to `README.md` or `CHANGELOG.md`** is documentation. No version increment, no
+  release — committed straight to `main`.
+
 A software change therefore moves like this:
 
 ```

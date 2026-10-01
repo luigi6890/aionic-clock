@@ -5,6 +5,17 @@ All notable changes to Aionic Clock, following [Semantic Versioning](https://sem
 Only changes to the released software are listed here. Documentation and repository
 metadata updates — such as the README — are committed to `main` without a version bump.
 
+## [1.6.1] - 2026-10-01
+
+### Changed
+- About: the Overview now describes the whole toolkit and how it is built, instead of
+  listing features in passing.
+- Key features cards are reordered so cards of similar height sit together, and the
+  Living sky card is trimmed to match its neighbour.
+- FAQ: the world-clock sort entry is replaced with one on animation stutter, which
+  points at the Sky as the variable and lists the keys that quiet it. Entries are now
+  ordered by how long each title looks in the modal.
+
 ## [1.6.0] - 2026-10-01
 
 ### Added
