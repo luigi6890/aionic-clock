@@ -8,7 +8,7 @@ code, and everything you configure is remembered in your browser.
 
 **Try it live: [luigi6890.github.io/aionic-clock](https://luigi6890.github.io/aionic-clock/)**
 
-**Latest release: [v1.5.0](https://github.com/luigi6890/aionic-clock/releases/tag/v1.5.0)** ·
+**Latest release: [v1.6.1](https://github.com/luigi6890/aionic-clock/releases/tag/v1.6.1)** ·
 Full history in [CHANGELOG.md](CHANGELOG.md)
 
 ---
@@ -63,7 +63,7 @@ configure.
 | **Pomodoro** | Focus cycles with tasks, priorities, auto-start, and Do Not Disturb |
 | **World clock** | Ten cities with DST-correct offsets and click-to-preview |
 | **Ambience** | Eight procedurally synthesized soundscapes with a live visualizer |
-| **Compact widget** | A mini clock docked top-right in every view, and the ringing-alarm control surface |
+| **Compact widget** | A mini clock that stays docked top-right in every view |
 | **Sky** | A 24-hour gradient cycle with stars, haze, grain, and a clickable horizon |
 | **Wall mode** | Fullscreen screensaver clock with auto-hiding chrome |
 | **About** | The guide: overview, name and inspiration, key features, how to use, FAQ |
@@ -86,6 +86,8 @@ set of hidden niceties:
   second hand between sweep and tick.
 - **Three dial styles** — Standard, Roman, and Markers — cycled with <kbd>D</kbd> or by
   clicking any numeral directly.
+- The blinking **colons can be clicked** to re-sync them to the second, for the rare
+  occasions when the loop drifts out of step.
 - **12H and 24H** (<kbd>F</kbd>), with an AM/PM badge that fits without reflowing the
   digits, and a second-synced colon that only blinks on whole-second boundaries.
 - The **date** sits under the title, and a **primary-zone badge** appears whenever a
@@ -119,7 +121,10 @@ once you record the first lap, and every lap adds a row to the table below:
   dead zone keeps centisecond jitter from flickering a color.
 - **Paused time never counts.** A segment measures only the time the stopwatch was
   actually running, so a long pause between laps cannot inflate the next split.
-- **Reset** clears the total, the laps, and the splits together.
+- A **status line** under the buttons reports the running and paused states and confirms
+  each recorded lap, matching the Timer's.
+- **Reset** clears the total, the laps, and the splits together, and the status line
+  returns to its opening message.
 
 ### ⏰ Alarms
 
@@ -137,8 +142,11 @@ so nothing you are typing gets silently dropped. Click any row to expand its edi
 - **Overlap warnings** flag a new alarm that collides with one you already have, and a
   **live countdown** chip can be switched on to watch the next ring approach.
 - **Sorting** by Manual, Time, or Label; drag to reorder in Manual.
-- The **floating widget** docks top-right in every view and becomes the control surface
-  while something is ringing.
+- The **floating alarm widget** appears as its own card in the right-hand column
+  whenever something is ringing, docked just below the compact clock. It carries a
+  per-alarm snooze and a red dismiss for each ring, a snooze-length picker that sets
+  those buttons, and an **All ✕** to dismiss everything at once. In the Alarm view it
+  stands down, since the panel's own banner takes over.
 
 ### 🍅 Pomodoro
 
@@ -181,6 +189,9 @@ is built from independent oscillator and noise layers.
 - **All** starts every soundscape together, staggered so they blend instead of stacking.
 - A **volume slider** (with a live readout) governs the whole panel, and a **live
   color-coded spectrum visualizer** runs above the list.
+- The **volume icon is a mute button**: it silences the mix without touching your level,
+  so the slider keeps its setting and unmuting restores exactly that volume. Mute lasts
+  for the session only, so a reload never comes back silent unexpectedly.
 - The panel opens with the dock's Ambience button or <kbd>~</kbd>. No audio files are
   loaded — the note under the list says so.
 
@@ -192,8 +203,8 @@ top-right corner so the time is never lost.
 - It **follows the clock mode** — analog or digital, dial style included — and keeps only
   the four cardinals on its tiny dial so they stay legible.
 - The **AM/PM badge** appears in the same corner without resizing the widget.
-- While an alarm is ringing it **becomes the alarm panel**, with per-alarm snooze, a
-  snooze-length picker, and a dismiss-all button.
+- It **stays put** when an alarm rings: the floating alarm widget is a separate card
+  docked just below it, so both remain visible at once.
 - Hovering it **reveals the volume level**.
 
 ---
@@ -330,15 +341,15 @@ twelve; the compact widget renders only the cardinals.
 
 ```
 aionic-clock/
-├── index.html      582 lines   structure, panels, and the About/Help modals
-├── style.css      1,313 lines   all styling, including the sky and dial scales
-├── script.js      2,320 lines   every feature: time, alarms, audio, sky, storage
-├── CHANGELOG.md      79 lines   release history, following Keep a Changelog
+├── index.html      593 lines   structure, panels, and the About/Help modals
+├── style.css     1,326 lines   all styling, including the sky and dial scales
+├── script.js     2,342 lines   every feature: time, alarms, audio, sky, storage
+├── CHANGELOG.md    136 lines   release history, following Keep a Changelog
 ├── .gitattributes               pins LF in the repo, CRLF on Windows checkouts
 └── README.md
 ```
 
-About 4,200 lines of code. The long single-file layout is deliberate: it
+About 4,260 lines of code. The long single-file layout is deliberate: it
 keeps the project dependency-free and trivial to read end to end, and every feature is
 organized under a banner comment in `script.js`.
 
