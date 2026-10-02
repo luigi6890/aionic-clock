@@ -400,14 +400,24 @@ The rule:
 > recorded in the changelog, and released. Documentation and repository metadata changes do
 > not require a version increment or release.
 
-Concretely, by file:
+Concretely, every change falls into one of two buckets:
 
-- **A change to `index.html`, `style.css`, or `script.js`** is a software change, released
-  under the appropriate MAJOR, MINOR, or PATCH increment, however small. This includes the
-  About and Help modals: their copy and layout ship inside the app, so editing them counts
-  as changing the software, not as documentation.
-- **A change to `README.md` or `CHANGELOG.md`** is documentation. No version increment, no
-  release — committed straight to `main`.
+**App files** — `index.html`, `script.js`, `style.css`
+
+These are the web app itself. A change here ships to the browser, so it gets the
+appropriate MAJOR, MINOR, or PATCH increment and a release, however small. This
+includes the About and Help modals: their copy and layout are part of the app,
+not documentation.
+
+**Repository infrastructure and documentation** — `README.md`, `CHANGELOG.md`,
+`.gitattributes`, `tools/`
+
+These support the repository or the development workflow rather than the app
+runtime. No version increment, no release: committed straight to `main`.
+
+The test is whether the change affects what ships to the user, not which folder
+it sits in. A file that would be served to the browser belongs with the app even
+if it lives outside those three.
 
 A software change therefore moves like this:
 
