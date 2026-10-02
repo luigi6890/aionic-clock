@@ -37,9 +37,9 @@
   <!-- Top-left toolbar (kept clear of top-right compact widget) -->
   <div class="toolbar">
     <button class="tool-btn" id="clockModeBtn" aria-label="Toggle analog / digital mode (M)" title="Analog / Digital (M)">🔢</button>
-    <button class="tool-btn" id="themeBtn" aria-label="Toggle light / dark mode (L)" title="Light / Dark (L)">🌙</button>
-    <button class="tool-btn" id="variantBtn" aria-label="Toggle glass / solid card theme" title="Glass / Solid card theme">🪟</button>
-    <button class="tool-btn" id="skyBtn" aria-label="Toggle time-of-day sky background" title="Time-of-day sky background">☁️</button>
+        <button class="tool-btn" id="themeBtn" aria-label="Toggle light / dark mode (1)" title="Light / Dark (1)">🌙</button>
+        <button class="tool-btn" id="variantBtn" aria-label="Toggle glass / solid card theme (2)" title="Glass / Solid (2)">🪟</button>
+        <button class="tool-btn" id="skyBtn" aria-label="Toggle time-of-day sky background (3)" title="Time-of-day sky (3)">☁️</button>
     <button class="tool-btn" id="wallBtn" aria-label="Wall clock fullscreen mode (X)" title="Wall clock / screensaver (X)">⛶</button>
   </div>
   <button class="zone-toggle" id="zoneBtn" aria-label="Toggle world clock panel (W)" title="World clock (W)" aria-pressed="false">🌐 <span>World Clock</span></button>
@@ -175,7 +175,7 @@
         <div class="split-live hidden" id="swSplit"><span class="lbl">Split</span><span class="val" id="swSplitTime">00:00.<span class="cs">00</span></span></div>
         <div class="btn-row">
           <button class="btn primary" id="swStart">Start <kbd>Space</kbd></button>
-          <button class="btn ghost" id="swLap">Lap</button>
+          <button class="btn ghost" id="swLap">Lap <kbd>L</kbd></button>
           <button class="btn danger" id="swReset">Reset <kbd>R</kbd></button>
         </div>
         <p class="status" id="swStatus">Press Start to run the stopwatch.</p>
@@ -391,7 +391,7 @@
         <div class="banner-text">
           <h2 id="aboutTitle">Aionic Clock</h2>
           <p class="tagline">&ldquo;<span id="taglineText"></span><span class="caret"></span>&rdquo;</p>
-          <span class="ver">v1.6.1</span>
+          <span class="ver">v1.7.0</span>
         </div>
       </div>
       <div class="about-body">
@@ -404,7 +404,7 @@
             when the screen is the only thing left on the desk.</p>
           <p>Everything you see and hear is generated in code — the soundscapes, the sky, the motion — with no
             frameworks, no audio files, and no network calls, so it opens instantly and works offline. Alarms,
-            tasks, themes, and mixes are remembered in your browser. Reach for it as a desk clock, a study
+            tasks, and themes are remembered in your browser, along with your volume level. Reach for it as a desk clock, a study
             companion, a meeting timer, a focus timer, or a screensaver.</p>
           <p class="muted">Built for anyone who likes their time beautifully kept.</p>
         </section>
@@ -421,14 +421,14 @@
         <section>
           <h3 data-collapsible>Key features</h3>
           <div class="feat-grid">
-            <div><b>🕒 Dual clock</b><p>Two faces for the same moment.</p><ul><li>Analog + digital clock faces</li><li>Full twelve-numeral dial, cardinals emphasized</li><li>Standard, Roman &amp; marker styles — click a numeral to cycle</li><li>12/24H formats with second-synced colons</li><li>Sweep or ticking second hand</li></ul></div>
-            <div><b>⏳ Timer &amp; ⏱️ Stopwatch</b><p>Measure anything precisely.</p><ul><li>Stacking presets from 10s to 10m</li><li>Centisecond stopwatch readout</li><li>Live split timer under the readout</li><li>Lap table with splits graded green or red</li><li>Paused time never counts toward a lap</li><li>Countdown finishes in green</li></ul></div>
+            <div><b>🕒 Dual clock</b><p>Two faces for the same moment.</p><ul><li>Analog + digital clock faces</li><li>Full twelve-numeral dial, cardinals emphasized</li><li>Standard, Roman &amp; marker styles — click a numeral to cycle</li><li>12/24H formats with second-synced colons</li><li>Click the colons to re-sync them</li><li>Sweep or ticking second hand</li></ul></div>
+            <div><b>⏳ Timer &amp; ⏱️ Stopwatch</b><p>Measure anything precisely.</p><ul><li>Stacking presets from 10s to 10m</li><li>Centisecond stopwatch readout</li><li>Live split timer under the readout</li><li>Lap table with splits graded green or red</li><li>Paused time never counts toward a lap</li><li>Status line for run, pause and laps</li><li>Countdown finishes in green</li></ul></div>
             <div><b>⏰ Alarms</b><p>Never miss the moment.</p><ul><li>Labels, repeats, categories &amp; five tones</li><li>Simultaneous alarms ring as one event</li><li>In-row editor, overlap warnings, live countdowns</li><li>Test mode triggers alarm rehearsals</li><li>Floating widget, flashing titles</li><li>Saved locally, box resets after adding</li></ul></div>
             <div><b>🍅 Pomodoro</b><p>Focus in flavorful cycles.</p><ul><li>Focus, short &amp; long phases, depleting ring</li><li>DND by pressing the dial, ⏭ skip rotation</li><li>Tasks with priorities &amp; 🍅 block estimates</li><li>Auto-start options, session dots</li><li>Phase-matched skies, active-task headline</li><li>Configurable minutes &amp; long break intervals</li></ul></div>
             <div><b>🔍 Compact widget</b><p>Time stays visible everywhere.</p><ul><li>Mini clock parks top-right in every tool</li><li>Follows analog and digital modes</li><li>AM/PM badge fits without resizing</li><li>Cardinals only on the tiny dial</li><li>Ringing alarms dock here with snooze &amp; dismiss</li></ul></div>
             <div><b>🌌 Living sky</b><p>Weather for your wallpaper.</p><ul><li>24-hour gradient cycle: stars at night, haze and grain by day</li><li>Drifting color blobs tinted to the hour</li><li>Clickable horizon silhouettes: hills, mountains, city, re-tinting with the sky</li><li>Light &amp; dark themes, glass or solid cards</li><li>Per-phase focus palettes: rolling waves, rising bubbles</li></ul></div>
             <div><b>🌐 World clock</b><p>Ten zones at a glance.</p><ul><li>Day-phase emoji per local hour</li><li>Drag order; sort by city, country, time</li><li>Click-to-preview on the main dial</li><li>Country, date &amp; GMT offsets</li></ul></div>
-            <div><b>🎧 Ambience</b><p>Eight rooms of procedural sound.</p><ul><li>Storm, dawn, leaves, brook, frogs, bamboo, night, fire</li><li>Layer mixer, auto-DJ rotation, Play All</li><li>Live color-coded visualizer</li></ul></div>
+            <div><b>🎧 Ambience</b><p>Eight rooms of procedural sound.</p><ul><li>Storm, dawn, leaves, brook, frogs, bamboo, night, fire</li><li>Layer mixer, auto-DJ rotation, Play All</li><li>Volume icon mutes without losing your level</li><li>Live color-coded visualizer</li></ul></div>
             <div><b>⛶ Wall mode</b><p>Turn any screen into a clock.</p><ul><li>Fullscreen with auto-hiding chrome</li><li>Contracting analog face, solid-ink digits</li><li>In-face date pill on analog</li></ul></div>
             <div><b>⌨️ Keyboard-first</b><p>Mouse optional.</p><ul><li>Full shortcut map under <kbd>?</kbd>/<kbd>H</kbd></li><li>Display keys stay silent in wall mode</li></ul></div>
           </div>
@@ -438,12 +438,12 @@
           <ol class="howto">
             <li><b>Pick a view</b><span><kbd>C</kbd> clock &middot; <kbd>T</kbd> timer &middot; <kbd>S</kbd> stopwatch &middot; <kbd>A</kbd> alarm &middot; <kbd>P</kbd> Pomodoro &middot; <kbd>W</kbd> world clock &middot; <kbd>~</kbd> ambience</span></li>
             <li><b>Run the tool</b><span><kbd>Space</kbd> starts and pauses, <kbd>R</kbd> resets. Tap a timer preset repeatedly to stack time instead of replacing it.</span></li>
-            <li><b>Record laps</b><span>Lap freezes a split under the main readout and files a row, graded green or red against your running average. Paused time never counts toward a segment.</span></li>
+            <li><b>Record laps</b><span><kbd>L</kbd> or the Lap button freezes a split under the main readout and files a row, graded green or red against your running average. Paused time never counts toward a segment.</span></li>
             <li><b>Reshape the display</b><span><kbd>M</kbd> analog or digital &middot; <kbd>F</kbd> 12/24H &middot; <kbd>D</kbd> dial style &middot; <kbd>/</kbd> sweep or tick &middot; <kbd>X</kbd> fullscreen wall clock</span></li>
             <li><b>Preview a city</b><span>Click a world-clock zone to re-time the main clock to it, then click the badge to come back home.</span></li>
             <li><b>Focus with Pomodoro</b><span>Flip Focus, Short and Long phases, tune minutes, cycle length and auto-starts, then add tasks with priorities and 🍅 block estimates (click one to activate it). Press the dial for Do Not Disturb; ⏭ skips forward in true cycle order.</span></li>
             <li><b>Run alarms</b><span>Click any row to edit time, label, repeat, category or sound. Test fires the real same-minute group; drag to reorder, sort, or switch on live countdowns.</span></li>
-            <li><b>Set the mood</b><span>🎵 opens eight soundscapes to mix, shuffle or play all. Restyle with <kbd>L</kbd>/<kbd>1</kbd> light or dark, the 🪟/🧱 toggle or <kbd>2</kbd> glass or solid, and ☁️ or <kbd>3</kbd> for the living sky — then click the horizon to swap landscapes.</span></li>
+            <li><b>Set the mood</b><span>🎵 opens eight soundscapes to mix, shuffle or play all. Restyle with <kbd>1</kbd> light or dark, the 🪟/🧱 toggle or <kbd>2</kbd> glass or solid, and ☁️ or <kbd>3</kbd> for the living sky — then click the horizon to swap landscapes.</span></li>
             <li><b>Find the rest</b><span><kbd>?</kbd>/<kbd>H</kbd> opens the full shortcut map; ⓘ/<kbd>`</kbd> brings this guide back.</span></li>
           </ol>
         </section>
@@ -469,7 +469,7 @@
           <div class="stack-row">
             <span>HTML</span><span>CSS</span><span>JavaScript</span><span>Web Audio API</span><span>SVG</span><span>Intl API</span><span>localStorage</span>
           </div>
-          <p class="muted">No frameworks, no audio files, no network calls. A Web Audio synthesis engine voices eight soundscapes through a live spectrum visualizer plus five alarm tones; an Intl-powered zone engine tracks ten cities with DST-aware offsets; a boundary-locked timing loop keeps digits, colons, and hands in lockstep; container-query dials scale every hand proportionally; and a persisted state layer remembers alarms, tasks, themes, and mixes across visits — every sound, sky, and motion generated live in code.</p>
+          <p class="muted">No frameworks, no audio files, no network calls. A Web Audio synthesis engine voices eight soundscapes through a live spectrum visualizer plus five alarm tones; an Intl-powered zone engine tracks ten cities with DST-aware offsets; a boundary-locked timing loop keeps digits, colons, and hands in lockstep; container-query dials scale every hand proportionally; and a persisted state layer remembers alarms, tasks, themes, and volume across visits — every sound, sky, and motion generated live in code.</p>
         </section>
         <section>
           <h3>Design philosophy</h3>
@@ -529,7 +529,7 @@
               the Sky does.</p>
           </details>
         </section>
-        <p class="credit">A fun personal project by <b>luigi6890</b> · v1.6.1</p>
+        <p class="credit">A fun personal project by <b>luigi6890</b> · v1.7.0</p>
       </div>
     </div>
   </div>
@@ -552,6 +552,7 @@
           <h3>Timer tools</h3>
           <table>
             <tr><td><kbd>Space</kbd></td><td>Start / Pause timer, stopwatch or pomodoro</td></tr>
+            <tr><td><kbd>L</kbd></td><td>Record a lap on the stopwatch</td></tr>
             <tr><td><kbd>R</kbd></td><td>Reset timer, stopwatch or pomodoro</td></tr>
           </table>
           <h3>Wall mode</h3>

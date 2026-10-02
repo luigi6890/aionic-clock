@@ -5,6 +5,25 @@ All notable changes to Aionic Clock, following [Semantic Versioning](https://sem
 Only changes to the released software are listed here. Documentation and repository
 metadata updates — such as the README — are committed to `main` without a version bump.
 
+## [1.7.0] - 2026-10-02
+
+### Added
+- Lap is now a keyboard shortcut. Press <kbd>L</kbd> on the stopwatch to record a
+  split, and the button shows its key alongside Start and Reset.
+- Key Features now covers what v1.6.0 added: the clickable colons, the stopwatch
+  status line, and the ambience volume-icon mute.
+
+### Changed
+- <kbd>L</kbd> records a lap instead of toggling light / dark, which stays on
+  <kbd>1</kbd>. The toolbar's hover text and accessible names now show the keys
+  that actually work — 1, 2 and 3.
+- <kbd>L</kbd> and the Lap button share one handler, so the key and the click
+  can never drift apart.
+
+### Fixed
+- About no longer claims the ambience mix is remembered between visits. Only your
+  volume level persists, so the Overview and Tech stack now say that instead.
+
 ## [1.6.1] - 2026-10-01
 
 ### Changed

@@ -69,8 +69,9 @@ configure.
 | **About** | The guide: overview, name and inspiration, key features, how to use, FAQ |
 | **Help** | The full keyboard shortcut map, always one keypress away |
 
-State is persisted in `localStorage`, so your alarms, tasks, themes, and mixes survive a
-refresh or a return visit. Nothing is ever uploaded — there is no account and no server.
+State is persisted in `localStorage`, so your alarms, tasks, themes, and volume survive a
+refresh or a return visit. The ambience mix itself starts fresh each session. Nothing is
+ever uploaded — there is no account and no server.
 
 ---
 
@@ -111,8 +112,9 @@ A plain countdown for one job, with two ways to set it:
 
 ### ⏱️ Stopwatch
 
-Press **Lap** to freeze a segment. A small split timer appears under the main readout
-once you record the first lap, and every lap adds a row to the table below:
+Press **Lap** — or <kbd>L</kbd> — to freeze a segment. A small split timer appears under
+the main readout once you record the first lap, and every lap adds a row to the table
+below:
 
 - **Splits are centered and bold** in each row, with the lap number and running total
   flanking them.
@@ -205,7 +207,6 @@ top-right corner so the time is never lost.
 - The **AM/PM badge** appears in the same corner without resizing the widget.
 - It **stays put** when an alarm rings: the floating alarm widget is a separate card
   docked just below it, so both remain visible at once.
-- Hovering it **reveals the volume level**.
 
 ---
 
@@ -229,6 +230,7 @@ top-right corner so the time is never lost.
 | Key | Action |
 | --- | --- |
 | <kbd>Space</kbd> | Start / pause timer, stopwatch, or Pomodoro |
+| <kbd>L</kbd> | Record a lap on the stopwatch |
 | <kbd>R</kbd> | Reset the running tool |
 
 ### Clock display

@@ -259,7 +259,7 @@ function applyThemeIcon() {
   // Sun while light, moon while dark; window icon while glass, brick while solid.
   themeBtn.textContent = document.body.dataset.theme === 'light' ? '☀️' : '🌙';
   themeBtn.disabled = prefs.sky === true;
-  themeBtn.title = prefs.sky === true ? 'Turn off Sky to switch theme' : 'Light / Dark (L)';
+  themeBtn.title = prefs.sky === true ? 'Turn off Sky to switch theme' : 'Light / Dark (1)';
   skyBtn.classList.toggle('on', prefs.sky === true);
   variantBtn.textContent = document.body.dataset.variant === 'solid' ? '🧱' : '🪟';
   syncDockWidth();
@@ -652,9 +652,7 @@ function startPauseSW() {
   renderSW();
 }
 function resetSW() { swRunning = false; cancelAnimationFrame(swId); swId = null; swElapsed = 0; lapCount = 0; swLapBase = 0; swSplits = []; swLaps.innerHTML = ''; swSplitLive.classList.add('hidden'); swStatus.textContent = 'Press Start to run the stopwatch.'; renderSW(); }
-swStartBtn.addEventListener('click', startPauseSW);
-document.getElementById('swReset').addEventListener('click', resetSW);
-document.getElementById('swLap').addEventListener('click', () => {
+function lapSW() {
   if (!swRunning && swElapsed === 0) return;
   const total = swTotal();
   const split = total - swLapBase;
@@ -673,7 +671,10 @@ document.getElementById('swLap').addEventListener('click', () => {
   swLaps.prepend(li);
   swSplitLive.classList.remove('hidden');
   swStatus.textContent = lapCount === 1 ? 'First lap recorded.' : `Lap ${lapCount} recorded.`;
-});
+}
+swStartBtn.addEventListener('click', startPauseSW);
+document.getElementById('swReset').addEventListener('click', resetSW);
+document.getElementById('swLap').addEventListener('click', lapSW);
 renderSW();
 
 // ---------- Alarm ----------
@@ -2243,9 +2244,7 @@ document.addEventListener('keydown', (e) => {
     case 'x': setWall(document.body.dataset.wall !== 'on'); break;
     case 'd': if (document.body.dataset.clock === 'analog') cycleDial(); break;
     case '/': if (document.body.dataset.clock === 'analog') setSweep(prefs.sweep === 'smooth' ? 'tick' : 'smooth'); break;
-    case 'l':
-      setTheme(document.body.dataset.theme === 'dark' ? 'light' : 'dark');
-      break;
+    case 'l': lapSW(); break;
     case '1':
       setTheme(document.body.dataset.theme === 'dark' ? 'light' : 'dark');
       break;
